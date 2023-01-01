@@ -143,6 +143,53 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Animation.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Animations.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Brick.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Coin.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Collision.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\debug.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Game.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\GameObject.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Goomba.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\main.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Mario.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Platform.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\PlayScene.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Portal.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\SampleKeyEventHandler.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Sprite.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Sprites.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Textures.cpp" />
+    <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Animation.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\AnimationFrame.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Animations.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\AssetIDs.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Brick.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Coin.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Collision.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\debug.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Game.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\GameObject.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Goomba.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\KeyEventHandler.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Mario.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\MovingPlatform.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Platform.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\PlayScene.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Portal.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\SampleKeyEventHandler.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Scene.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Sprite.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Sprites.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Texture.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Textures.h" />
+    <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Utils.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets" Condition="Exists('..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" />
