@@ -1,9 +1,8 @@
 #pragma once
 #include"GameObject.h"
-
 #include "Enemy.h"
 
-
+#define KOOPATROOPA_GRAVITY 0.002f
 #define KOOPATROOPA_WALKING_SPEED 0.05f
 #define KOOPATROOPA_BBOX_WIDTH 16
 #define KOOPATROOPA_BBOX_HEIGHT 26
@@ -14,9 +13,8 @@
 
 #define KOOPATROOPA_ANI_WALKING 0
 #define KOOPATROOPA_ANI_HIDING 1
-class CKoopaTroopa :public CGameObject
+class CKoopaTroopa :public Enemy
 {
-protected:
 	float ax;
 	float ay;
 
@@ -32,4 +30,6 @@ protected:
 public:
 	CKoopaTroopa(float x, float y);
 	virtual void SetState(int state);
+	virtual bool IsDead();
+	virtual void SetDie();
 };

@@ -10,6 +10,7 @@ public:
 	virtual bool IsDead() = 0;
 	virtual	void SetDie() = 0;
 	Enemy();
+	Enemy(float x, float y);
 	~Enemy();
 };
 

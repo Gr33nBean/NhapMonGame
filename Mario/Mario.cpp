@@ -5,6 +5,7 @@
 #include "Game.h"
 
 #include "Goomba.h"
+#include "KoopaTroopa.h"
 #include "Coin.h"
 #include "Portal.h"
 
@@ -160,17 +161,39 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 	}
 	else if (level == MARIO_LEVEL_FIRE)
 	{
-		left = x - MARIO_FIRE_BBOX_WIDTH / 2;
-		top = y - MARIO_FIRE_BBOX_HEIGHT / 2;
-		right = left + MARIO_FIRE_BBOX_WIDTH;
-		bottom = top + MARIO_FIRE_BBOX_HEIGHT;
+		if (isSitting)
+		{
+			left = x - MARIO_FIRE_SITTING_BBOX_WIDTH / 2;
+			top = y - MARIO_FIRE_SITTING_BBOX_HEIGHT / 2;
+			right = left + MARIO_FIRE_SITTING_BBOX_WIDTH;
+			bottom = top + MARIO_FIRE_SITTING_BBOX_HEIGHT;
+		}
+		else
+		{
+			left = x - MARIO_FIRE_BBOX_WIDTH / 2;
+			top = y - MARIO_FIRE_BBOX_HEIGHT / 2;
+			right = left + MARIO_FIRE_BBOX_WIDTH;
+			bottom = top + MARIO_FIRE_BBOX_HEIGHT;
+		}
+		
 	}
 	else if (level == MARIO_LEVEL_RACCOON)
 	{
-		left = x - MARIO_RACCOON_BBOX_WIDTH / 2;
-		top = y - MARIO_RACCOON_BBOX_HEIGHT / 2;
-		right = left + MARIO_RACCOON_BBOX_WIDTH;
-		bottom = top + MARIO_RACCOON_BBOX_HEIGHT;
+		if (isSitting)
+		{
+			left = x - MARIO_RACCOON_SITTING_BBOX_WIDTH / 2;
+			top = y - MARIO_RACCOON_SITTING_BBOX_HEIGHT / 2;
+			right = left + MARIO_RACCOON_SITTING_BBOX_WIDTH;
+			bottom = top + MARIO_RACCOON_SITTING_BBOX_HEIGHT;
+		}
+		else
+		{
+			left = x - MARIO_RACCOON_BBOX_WIDTH / 2;
+			top = y - MARIO_RACCOON_BBOX_HEIGHT / 2;
+			right = left + MARIO_RACCOON_BBOX_WIDTH;
+			bottom = top + MARIO_RACCOON_BBOX_HEIGHT;
+		}
+		
 	}
 	
 
@@ -207,6 +230,8 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 
 	if (dynamic_cast<CGoomba*>(e->obj))
 		OnCollisionWithGoomba(e);
+	else if (dynamic_cast<CKoopaTroopa*>(e->obj))
+		OnCollisionWithKoopaTroopa(e);
 	else if (dynamic_cast<CCoin*>(e->obj))
 		OnCollisionWithCoin(e);
 	else if (dynamic_cast<CPortal*>(e->obj))
@@ -222,9 +247,9 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	// jump on top >> kill Goomba and deflect a bit 
 	if (e->ny < 0)
 	{
-		if (goomba->GetState() != GOOMBA_STATE_DIE)
+		if (goomba->IsDead() != true)
 		{
-			goomba->SetState(GOOMBA_STATE_DIE);
+			goomba->SetDie();
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
@@ -232,7 +257,41 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	{
 		if (untouchable == 0)
 		{
-			if (goomba->GetState() != GOOMBA_STATE_DIE)
+			if (goomba->IsDead() != true)
+			{
+				if (level > MARIO_LEVEL_SMALL)
+				{
+					level = MARIO_LEVEL_SMALL;
+					StartUntouchable();
+				}
+				else
+				{
+					DebugOut(L">>> Mario DIE >>> \n");
+					SetState(MARIO_STATE_DIE);
+				}
+			}
+		}
+	}
+}
+
+void CMario::OnCollisionWithKoopaTroopa(LPCOLLISIONEVENT e)
+{
+	CKoopaTroopa* troopa = dynamic_cast<CKoopaTroopa*>(e->obj);
+
+	// jump on top >> kill Troopa and deflect a bit 
+	if (e->ny < 0)
+	{
+		if (troopa->IsDead() != true)
+		{
+			troopa->SetDie();
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+		}
+	}
+	else // hit by Troopa
+	{
+		if (untouchable == 0)
+		{
+			if (troopa->IsDead() != true)
 			{
 				if (level > MARIO_LEVEL_SMALL)
 				{

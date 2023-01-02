@@ -1,6 +1,6 @@
 #include "Goomba.h"
 
-CGoomba::CGoomba(float x, float y):CGameObject(x, y)
+CGoomba::CGoomba(float x, float y):Enemy(x, y)
 {
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;
@@ -72,7 +72,7 @@ void CGoomba::Render()
 	}
 
 	CAnimations::GetInstance()->Get(aniId)->Render(x,y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)
@@ -91,4 +91,18 @@ void CGoomba::SetState(int state)
 			vx = -GOOMBA_WALKING_SPEED;
 			break;
 	}
+}
+
+bool CGoomba::IsDead()
+{
+	if (this->state == GOOMBA_STATE_DIE)
+	{
+		return true;
+	}
+	return false;
+}
+
+void CGoomba::SetDie()
+{
+	this->SetState(GOOMBA_STATE_DIE);
 }

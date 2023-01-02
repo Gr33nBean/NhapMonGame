@@ -18,7 +18,7 @@
 #define ID_ANI_GOOMBA_WALKING 5000
 #define ID_ANI_GOOMBA_DIE 5001
 
-class CGoomba : public CGameObject
+class CGoomba : public Enemy
 {
 public:
 	float ax;				
@@ -38,4 +38,6 @@ public:
 
 	CGoomba(float x, float y);
 	virtual void SetState(int state);
+	virtual bool IsDead();
+	virtual void SetDie();
 };
