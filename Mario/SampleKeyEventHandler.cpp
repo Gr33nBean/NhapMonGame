@@ -65,6 +65,10 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_DOWN:
 		mario->SetState(MARIO_STATE_SIT_RELEASE);
 		break;
+	case DIK_B:
+		mario->isPickingUp = false;
+		DebugOut(L"Release B");
+		break;
 	}
 }
 
@@ -103,6 +107,9 @@ void CSampleKeyHandler::KeyState(BYTE *states)
 	}
 	else if (game->IsKeyDown(DIK_SPACE))
 		mario->Jump();
+	else if (game->IsKeyDown(DIK_B))
+		mario->PickUp();
+	//	mario->pickUp = true;
 	else
 	{
 		mario->SetState(MARIO_STATE_IDLE);

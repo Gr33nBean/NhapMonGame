@@ -13,6 +13,7 @@ CGameObject::CGameObject()
 	x = y = 0;
 	vx = vy = 0;
 	nx = 1;	
+	ny = 0;
 	state = -1;
 	isDeleted = false;
 }

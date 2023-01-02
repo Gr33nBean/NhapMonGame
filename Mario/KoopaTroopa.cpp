@@ -1,9 +1,12 @@
 #include "KoopaTroopa.h"
+#include "debug.h"
+#include "Brick.h"
 
 CKoopaTroopa::CKoopaTroopa(float x, float y) :Enemy(x, y)
 {
 	this->ax = 0;
 	this->ay = KOOPATROOPA_GRAVITY;
+	isPickedUp = false;
 	SetState(KOOPATROOPA_STATE_WALKING);
 }
 
@@ -28,13 +31,25 @@ void CKoopaTroopa::GetBoundingBox(float& left, float& top, float& right, float& 
 
 void CKoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (this->state == KOOPATROOPA_STATE_HIDING)
-	{
-		return;
-	}
 	vy += ay * dt;
 	vx += ax * dt;
 	Enemy::Update(dt, coObjects);
+	if (isPickedUp == true)
+	{
+		if (mario->isPickingUp == true)
+		{
+			this->vx = mario->vx;
+			this->vy = mario->vy;
+			this->nx = mario->nx;
+			this->ny = mario->ny;
+		}
+		else
+		{
+			isPickedUp = false;
+			this->SetState(KOOPATROOPA_STATE_HIDING);
+		}
+
+	}
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
 
@@ -87,14 +102,36 @@ void CKoopaTroopa::OnNoCollision(DWORD dt)
 void CKoopaTroopa::OnCollisionWith(LPCOLLISIONEVENT e)
 {
 	if (!e->obj->IsBlocking()) return;
-	if (dynamic_cast<CKoopaTroopa*>(e->obj)) return;
+	//if (dynamic_cast<CKoopaTroopa*>(e->obj)) return;
 
 	if (e->ny != 0)
 	{
 		vy = 0;
 	}
+	else if (isPickedUp == true)
+	{
+		if (dynamic_cast<Enemy*>(e->obj))
+		{
+			Enemy* enemy = dynamic_cast<Enemy*>(e->obj);
+			if (e->nx != 0)
+			{
+				enemy->SetDie();
+			}
+		}
+	}
 	else if (e->nx != 0)
 	{
 		vx = -vx;
 	}
+}
+
+void CKoopaTroopa::IsKicked(int nx)
+{
+	this->nx = nx;
+	if (this->nx < 0)
+	{
+		this->vx = -KOOPATROOPA_BUMP_SPEED;
+	}
+	else
+		this->vx = KOOPATROOPA_BUMP_SPEED;
 }

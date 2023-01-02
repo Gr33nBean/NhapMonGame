@@ -1,9 +1,10 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include "debug.h"
 
 #include "Mario.h"
 #include "Game.h"
 
+#include "Enemy.h"
 #include "Goomba.h"
 #include "KoopaTroopa.h"
 #include "Coin.h"
@@ -240,12 +241,13 @@ void CMario::SetLevel(int l)
 void CMario::Jump()
 {
 	DWORD current = GetTickCount64();
-	if (current - long_jump > MARIO_LONG_JUMP_TIME && isInGround == true
-		&& long_jump != 0)
+	if (current - long_jump_start > MARIO_LONG_JUMP_TIME && isInGround == true
+		&& long_jump_start != 0)
 	{
+		// nếu Mario chưa tiếp đất hoặc vật thì ko cho phép nhảy
 		this->SetState(MARIO_STATE_LONG_JUMP);
 		isJump == false;
-		long_jump = 0;
+		long_jump_start = 0;
 	}
 
 
@@ -253,7 +255,7 @@ void CMario::Jump()
 void CMario::unJump()
 {
 	DWORD current = GetTickCount64();
-	if (current - long_jump < MARIO_LONG_JUMP_TIME && this->isInGround == true && isJump == true)
+	if (current - long_jump_start < MARIO_LONG_JUMP_TIME && this->isInGround == true && isJump == true)
 	{
 		this->SetState(MARIO_STATE_JUMP);
 		DebugOut(L"\nxyz");
@@ -263,10 +265,10 @@ void CMario::unJump()
 	{
 		DebugOut(L"\nisInGround %d", isInGround);
 		DebugOut(L"\nisJump %d", isJump);
-		DebugOut(L"\nC: %d - L: %d", current, long_jump);
+		DebugOut(L"\nC: %d - L: %d", current, long_jump_start);
 	}
 	isJump = false;
-	long_jump = 0;
+	long_jump_start = 0;
 }
 
 void CMario::FillUpPowerMelter()
@@ -278,7 +280,7 @@ void CMario::FillUpPowerMelter()
 	}
 	else
 	{
-		if (current - stack_time_start > 1000 && power_melter_stack < POWER_METER_FULL)
+		if (current - stack_time_start > STACK_TIME && power_melter_stack < POWER_METER_FULL)
 		{
 			power_melter_stack += 1;
 			stack_time_start = 0;
@@ -290,14 +292,14 @@ void CMario::LosePowerMelter()
 {
 	if (vx == 0)
 	{
-		DWORD current = GetTickCount();
+		DWORD current = GetTickCount64();
 		if (stack_time_start == 0)
 		{
 			stack_time_start = current;
 		}
 		else
 		{
-			if (current - stack_time_start > 1000 && power_melter_stack > 0)
+			if (current - stack_time_start > STACK_TIME && power_melter_stack > 0)
 			{
 				power_melter_stack -= 1;
 				stack_time_start = 0;
@@ -311,6 +313,12 @@ void CMario::Information()
 	DebugOut(L"\nX: %d, Y: %d", this->x, this->y);
 	DebugOut(L"\nVx: %f, Vy: %f", this->vx, this->vy);
 }
+void CMario::PickUp()
+{
+	isPickingUp = true;
+
+}
+
 
 
 // Collision
@@ -328,7 +336,7 @@ void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 		if (e->ny < 0) isInGround = true;
 	}
 	else 
-	if (e->nx != 0 && e->obj->IsBlocking())
+	if (e->nx != 0 && e->obj->IsBlocking() && isPickingUp == false)
 	{
 		vx = 0;
 	}
@@ -364,7 +372,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 			{
 				if (level > MARIO_LEVEL_SMALL)
 				{
-					level = MARIO_LEVEL_SMALL;
+					level -= 1;
 					StartUntouchable();
 				}
 				else
@@ -387,6 +395,7 @@ void CMario::OnCollisionWithKoopaTroopa(LPCOLLISIONEVENT e)
 		if (troopa->IsDead() != true)
 		{
 			troopa->SetDie();
+			isInGround = true;
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
@@ -398,13 +407,25 @@ void CMario::OnCollisionWithKoopaTroopa(LPCOLLISIONEVENT e)
 			{
 				if (level > MARIO_LEVEL_SMALL)
 				{
-					level = MARIO_LEVEL_SMALL;
+					level -= 1;
 					StartUntouchable();
 				}
 				else
 				{
 					DebugOut(L">>> Mario DIE >>> \n");
 					SetState(MARIO_STATE_DIE);
+				}
+			}
+			else // Rinh và kick cái mai
+			{
+				if (isPickingUp == true)
+				{
+					troopa->PickUpBy(this);
+				}
+				else
+				{
+					troopa->isPickedUp = false;
+					troopa->IsKicked(this->nx);
 				}
 			}
 		}
@@ -534,7 +555,7 @@ int CMario::GetAniIdBig()
 					else
 						aniId = ID_ANI_MARIO_BIG_WALKING_RIGHT;
 				}
-				else
+				else 
 				{
 					aniId = ID_ANI_MARIO_BIG_BRACE_RIGHT;
 				}

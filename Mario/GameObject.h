@@ -16,7 +16,7 @@ using namespace std;
 
 class CGameObject
 {
-protected:
+public:
 
 	float x; 
 	float y;
@@ -25,12 +25,12 @@ protected:
 	float vy;
 
 	int nx;	 
+	int ny;
 
 	int state;
 
 	bool isDeleted; 
 
-public: 
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
 	void SetSpeed(float vx, float vy) { this->vx = vx, this->vy = vy; }
 	void GetPosition(float &x, float &y) { x = this->x; y = this->y; }
