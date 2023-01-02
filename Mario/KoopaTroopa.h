@@ -1,6 +1,8 @@
 #pragma once
 #include"GameObject.h"
 
+#include "Enemy.h"
+
 
 #define KOOPATROOPA_WALKING_SPEED 0.05f
 #define KOOPATROOPA_BBOX_WIDTH 16

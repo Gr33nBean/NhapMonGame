@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Enemy.h"
 
 #define GOOMBA_GRAVITY 0.002f
 #define GOOMBA_WALKING_SPEED 0.05f
@@ -19,7 +20,7 @@
 
 class CGoomba : public CGameObject
 {
-protected:
+public:
 	float ax;				
 	float ay; 
 
@@ -35,7 +36,6 @@ protected:
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 
-public: 	
 	CGoomba(float x, float y);
 	virtual void SetState(int state);
 };

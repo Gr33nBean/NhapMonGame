@@ -40,6 +40,10 @@ void CMario::Render()
 		aniId = GetAniIdBig();
 	else if (level == MARIO_LEVEL_SMALL)
 		aniId = GetAniIdSmall();
+	else if (level == MARIO_LEVEL_FIRE)
+		aniId = GetAniIdFire();
+	else if (level == MARIO_LEVEL_RACCOON)
+		aniId = GetAniIdRaccoon();
 
 	animations->Get(aniId)->Render(x, y);
 
@@ -147,15 +151,40 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 			bottom = top + MARIO_BIG_BBOX_HEIGHT;
 		}
 	}
-	else
+	else if (level == MARIO_LEVEL_SMALL)
 	{
 		left = x - MARIO_SMALL_BBOX_WIDTH / 2;
 		top = y - MARIO_SMALL_BBOX_HEIGHT / 2;
 		right = left + MARIO_SMALL_BBOX_WIDTH;
 		bottom = top + MARIO_SMALL_BBOX_HEIGHT;
 	}
+	else if (level == MARIO_LEVEL_FIRE)
+	{
+		left = x - MARIO_FIRE_BBOX_WIDTH / 2;
+		top = y - MARIO_FIRE_BBOX_HEIGHT / 2;
+		right = left + MARIO_FIRE_BBOX_WIDTH;
+		bottom = top + MARIO_FIRE_BBOX_HEIGHT;
+	}
+	else if (level == MARIO_LEVEL_RACCOON)
+	{
+		left = x - MARIO_RACCOON_BBOX_WIDTH / 2;
+		top = y - MARIO_RACCOON_BBOX_HEIGHT / 2;
+		right = left + MARIO_RACCOON_BBOX_WIDTH;
+		bottom = top + MARIO_RACCOON_BBOX_HEIGHT;
+	}
+	
+
 }
 
+void CMario::SetLevel(int l)
+{
+	// Adjust position to avoid falling off platform
+	if (this->level == MARIO_LEVEL_SMALL)
+	{
+		y -= (MARIO_BIG_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT) / 2;
+	}
+	level = l;
+}
 
 void CMario::OnNoCollision(DWORD dt)
 {
@@ -259,9 +288,9 @@ int CMario::GetAniIdSmall()
 		if (isSitting)
 		{
 			if (nx > 0)
-				aniId = ID_ANI_MARIO_SIT_RIGHT;
+				aniId = ID_ANI_MARIO_BIG_SIT_RIGHT;
 			else
-				aniId = ID_ANI_MARIO_SIT_LEFT;
+				aniId = ID_ANI_MARIO_BIG_SIT_LEFT;
 		}
 		else
 			if (vx == 0)
@@ -305,65 +334,177 @@ int CMario::GetAniIdBig()
 		if (abs(ax) == MARIO_ACCEL_RUN_X)
 		{
 			if (nx >= 0)
-				aniId = ID_ANI_MARIO_JUMP_RUN_RIGHT;
+				aniId = ID_ANI_MARIO_BIG_JUMP_RUN_RIGHT;
 			else
-				aniId = ID_ANI_MARIO_JUMP_RUN_LEFT;
+				aniId = ID_ANI_MARIO_BIG_JUMP_RUN_LEFT;
 		}
 		else
 		{
 			if (nx >= 0)
-				aniId = ID_ANI_MARIO_JUMP_WALK_RIGHT;
+				aniId = ID_ANI_MARIO_BIG_JUMP_WALK_RIGHT;
 			else
-				aniId = ID_ANI_MARIO_JUMP_WALK_LEFT;
+				aniId = ID_ANI_MARIO_BIG_JUMP_WALK_LEFT;
 		}
 	}
 	else
 		if (isSitting)
 		{
 			if (nx > 0)
-				aniId = ID_ANI_MARIO_SIT_RIGHT;
+				aniId = ID_ANI_MARIO_BIG_SIT_RIGHT;
 			else
-				aniId = ID_ANI_MARIO_SIT_LEFT;
+				aniId = ID_ANI_MARIO_BIG_SIT_LEFT;
 		}
 		else
 			if (vx == 0)
 			{
-				if (nx > 0) aniId = ID_ANI_MARIO_IDLE_RIGHT;
-				else aniId = ID_ANI_MARIO_IDLE_LEFT;
+				if (nx > 0) aniId = ID_ANI_MARIO_BIG_IDLE_RIGHT;
+				else aniId = ID_ANI_MARIO_BIG_IDLE_LEFT;
 			}
 			else if (vx > 0)
 			{
 				if (ax < 0)
-					aniId = ID_ANI_MARIO_BRACE_RIGHT;
+					aniId = ID_ANI_MARIO_BIG_BRACE_RIGHT;
 				else if (ax == MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_RUNNING_RIGHT;
+					aniId = ID_ANI_MARIO_BIG_RUNNING_RIGHT;
 				else if (ax == MARIO_ACCEL_WALK_X)
-					aniId = ID_ANI_MARIO_WALKING_RIGHT;
+					aniId = ID_ANI_MARIO_BIG_WALKING_RIGHT;
 			}
 			else // vx < 0
 			{
 				if (ax > 0)
-					aniId = ID_ANI_MARIO_BRACE_LEFT;
+					aniId = ID_ANI_MARIO_BIG_BRACE_LEFT;
 				else if (ax == -MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_RUNNING_LEFT;
+					aniId = ID_ANI_MARIO_BIG_RUNNING_LEFT;
 				else if (ax == -MARIO_ACCEL_WALK_X)
-					aniId = ID_ANI_MARIO_WALKING_LEFT;
+					aniId = ID_ANI_MARIO_BIG_WALKING_LEFT;
 			}
 
-	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
+	if (aniId == -1) aniId = ID_ANI_MARIO_BIG_IDLE_RIGHT;
+
+	return aniId;
+}
+
+
+//
+// Get animdation ID for fire Mario
+//
+int CMario::GetAniIdFire()
+{
+	int aniId = -1;
+	if (!isOnPlatform)
+	{
+		if (abs(ax) == MARIO_ACCEL_RUN_X)
+		{
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_FIRE_JUMP_RUN_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_FIRE_JUMP_RUN_LEFT;
+		}
+		else
+		{
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_FIRE_JUMP_WALK_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_FIRE_JUMP_WALK_LEFT;
+		}
+	}
+	else
+		if (isSitting)
+		{
+			if (nx > 0)
+				aniId = ID_ANI_MARIO_FIRE_SIT_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_FIRE_SIT_LEFT;
+		}
+		else
+			if (vx == 0)
+			{
+				if (nx > 0) aniId = ID_ANI_MARIO_FIRE_IDLE_RIGHT;
+				else aniId = ID_ANI_MARIO_FIRE_IDLE_LEFT;
+			}
+			else if (vx > 0)
+			{
+				if (ax < 0)
+					aniId = ID_ANI_MARIO_FIRE_BRACE_RIGHT;
+				else if (ax == MARIO_ACCEL_RUN_X)
+					aniId = ID_ANI_MARIO_FIRE_RUNNING_RIGHT;
+				else if (ax == MARIO_ACCEL_WALK_X)
+					aniId = ID_ANI_MARIO_FIRE_WALKING_RIGHT;
+			}
+			else // vx < 0
+			{
+				if (ax > 0)
+					aniId = ID_ANI_MARIO_FIRE_BRACE_LEFT;
+				else if (ax == -MARIO_ACCEL_RUN_X)
+					aniId = ID_ANI_MARIO_FIRE_RUNNING_LEFT;
+				else if (ax == -MARIO_ACCEL_WALK_X)
+					aniId = ID_ANI_MARIO_FIRE_WALKING_LEFT;
+			}
+
+	if (aniId == -1) aniId = ID_ANI_MARIO_FIRE_IDLE_RIGHT;
 
 	return aniId;
 }
 
 
 
-void CMario::SetLevel(int l)
+//
+// Get animdation ID for raccoon Mario
+//
+int CMario::GetAniIdRaccoon()
 {
-	// Adjust position to avoid falling off platform
-	if (this->level == MARIO_LEVEL_SMALL)
+	int aniId = -1;
+	if (!isOnPlatform)
 	{
-		y -= (MARIO_BIG_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT) / 2;
+		if (abs(ax) == MARIO_ACCEL_RUN_X)
+		{
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_RACCOON_JUMP_RUN_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_RACCOON_JUMP_RUN_LEFT;
+		}
+		else
+		{
+			if (nx >= 0)
+				aniId = ID_ANI_MARIO_RACCOON_JUMP_WALK_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_RACCOON_JUMP_WALK_LEFT;
+		}
 	}
-	level = l;
-}
+	else
+		if (isSitting)
+		{
+			if (nx > 0)
+				aniId = ID_ANI_MARIO_RACCOON_SIT_RIGHT;
+			else
+				aniId = ID_ANI_MARIO_RACCOON_SIT_LEFT;
+		}
+		else
+			if (vx == 0)
+			{
+				if (nx > 0) aniId = ID_ANI_MARIO_RACCOON_IDLE_RIGHT;
+				else aniId = ID_ANI_MARIO_RACCOON_IDLE_LEFT;
+			}
+			else if (vx > 0)
+			{
+				if (ax < 0)
+					aniId = ID_ANI_MARIO_RACCOON_BRACE_RIGHT;
+				else if (ax == MARIO_ACCEL_RUN_X)
+					aniId = ID_ANI_MARIO_RACCOON_RUNNING_RIGHT;
+				else if (ax == MARIO_ACCEL_WALK_X)
+					aniId = ID_ANI_MARIO_RACCOON_WALKING_RIGHT;
+			}
+			else // vx < 0
+			{
+				if (ax > 0)
+					aniId = ID_ANI_MARIO_RACCOON_BRACE_LEFT;
+				else if (ax == -MARIO_ACCEL_RUN_X)
+					aniId = ID_ANI_MARIO_RACCOON_RUNNING_LEFT;
+				else if (ax == -MARIO_ACCEL_WALK_X)
+					aniId = ID_ANI_MARIO_RACCOON_WALKING_LEFT;
+			}
 
+	if (aniId == -1) aniId = ID_ANI_MARIO_RACCOON_IDLE_RIGHT;
+
+	return aniId;
+}
