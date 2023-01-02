@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GameObject.h"
 
 #include "Animation.h"
@@ -6,32 +6,46 @@
 
 #include "debug.h"
 
-#define MARIO_WALKING_SPEED		0.1f
-#define MARIO_RUNNING_SPEED		0.2f
-
+// ---- Thông số ----
 #define MARIO_ACCEL_WALK_X	0.0005f
 #define MARIO_ACCEL_RUN_X	0.0007f
 
-#define MARIO_JUMP_SPEED_Y		0.5f
-#define MARIO_JUMP_RUN_SPEED_Y	0.6f
+#define MARIO_WALKING_SPEED		0.1f
+#define MARIO_RUNNING_SPEED		0.2f
 
-#define MARIO_GRAVITY			0.002f
+#define MARIO_JUMP_SPEED_Y		0.5f
+#define MARIO_LONG_JUMP_SPEED_Y	0.6f
 
 #define MARIO_JUMP_DEFLECT_SPEED  0.4f
+#define MARIO_BRAKE_DEFLECT_SPEED 0.05f 
 
-#define MARIO_STATE_DIE				-10
+#define MARIO_GRAVITY			0.002f
+#define MARIO_DIE_DEFLECT_SPEED	 0.5f 
+
+#define BUFF_SPEED		0.05f
+#define POWER_METER_FULL 7
+#define STACK_TIME 3000
+
+
+// ---- State ----
+
 #define MARIO_STATE_IDLE			0
 #define MARIO_STATE_WALKING_RIGHT	100
 #define MARIO_STATE_WALKING_LEFT	200
 
 #define MARIO_STATE_JUMP			300
+#define MARIO_STATE_DIE				400
+#define MARIO_STATE_LONG_JUMP		500
 #define MARIO_STATE_RELEASE_JUMP    301
 
-#define MARIO_STATE_RUNNING_RIGHT	400
-#define MARIO_STATE_RUNNING_LEFT	500
+#define MARIO_STATE_RUNNING_RIGHT	600
+#define MARIO_STATE_RUNNING_LEFT	700
 
-#define MARIO_STATE_SIT				600
-#define MARIO_STATE_SIT_RELEASE		601
+#define MARIO_STATE_BRAKE_RIGHT		800
+#define MARIO_STATE_BRAKE_LEFT		900
+
+#define MARIO_STATE_SIT				1000
+#define MARIO_STATE_SIT_RELEASE		1001
 
 
 #pragma region ANIMATION_ID
@@ -128,8 +142,6 @@
 #define GROUND_Y 160.0f
 
 
-
-
 #define	MARIO_LEVEL_SMALL	1
 #define	MARIO_LEVEL_BIG		2
 #define MARIO_LEVEL_FIRE	3
@@ -157,19 +169,27 @@
 #define MARIO_RACCOON_SITTING_BBOX_HEIGHT 18
 
 
-#define MARIO_UNTOUCHABLE_TIME 2500
+#define MARIO_UNTOUCHABLE_TIME 1000
+#define MARIO_LONG_JUMP_TIME 200
 
 class CMario : public CGameObject
 {
+	int level;
+	int untouchable;
+	ULONGLONG untouchable_start;
+	BOOLEAN isInGround;
+
 	BOOLEAN isSitting;
 	float maxVx;
 	float ax;				// acceleration on x 
 	float ay;				// acceleration on y 
 
-	int level; 
-	int untouchable; 
-	ULONGLONG untouchable_start;
-	BOOLEAN isOnPlatform;
+	DWORD stack_time_start;
+	int power_melter_stack;
+	int jump_stack;
+	DWORD long_jump;
+
+
 	int coin; 
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
@@ -183,18 +203,24 @@ class CMario : public CGameObject
 	int GetAniIdRaccoon();
 
 public:
+	bool isJump;
 	CMario(float x, float y) : CGameObject(x, y)
 	{
+		level = MARIO_LEVEL_RACCOON;
+		untouchable = 0;
+		untouchable_start = -1;
+		isInGround = false;
+
 		isSitting = false;
 		maxVx = 0.0f;
 		ax = 0.0f;
 		ay = MARIO_GRAVITY; 
 
-		level = MARIO_LEVEL_RACCOON;
-		untouchable = 0;
-		untouchable_start = -1;
-		isOnPlatform = false;
 		coin = 0;
+
+
+		isJump = false;
+		power_melter_stack = 1;
 	}
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void Render();
@@ -214,5 +240,13 @@ public:
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
 
+	void StartJumping() { long_jump = GetTickCount64(); isInGround = false; isJump = true; }
+
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
+
+	void Jump();
+	void unJump();
+	void FillUpPowerMelter();
+	void LosePowerMelter();
+	void Information();
 };

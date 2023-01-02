@@ -53,6 +53,7 @@ void CKoopaTroopa::SetState(int state)
 	{
 		case KOOPATROOPA_STATE_WALKING:
 			vx = -KOOPATROOPA_WALKING_SPEED;
+			nx = -1;
 			break;
 		case KOOPATROOPA_STATE_HIDING:
 			y += (KOOPATROOPA_BBOX_HEIGHT - KOOPATROOPA_BBOX_HEIGHT_HIDING)/2;
