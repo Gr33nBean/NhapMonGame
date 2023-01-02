@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KoopaTroopa.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Coin.h">
@@ -147,6 +150,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Brick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KoopaTroopa.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

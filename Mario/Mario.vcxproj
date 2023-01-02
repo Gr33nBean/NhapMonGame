@@ -163,6 +163,7 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Sprites.cpp" />
     <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Textures.cpp" />
     <ClCompile Include="..\..\ThayDungGame\05-SceneManager\Utils.cpp" />
+    <ClCompile Include="KoopaTroopa.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Animation.h" />
@@ -189,6 +190,7 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Texture.h" />
     <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Textures.h" />
     <ClInclude Include="..\..\ThayDungGame\05-SceneManager\Utils.h" />
+    <ClInclude Include="KoopaTroopa.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
