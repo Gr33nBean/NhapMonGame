@@ -8,7 +8,7 @@ void CCoin::Render()
 	//RenderBoundingBox();
 }
 
-void CCoin::GetBoundingBox(float& l, float& t, float& r, float& b)
+void CCoin::GetBoundingBox(float& l, float& t, float& r, float& b, bool isEnable)
 {
 	l = x - COIN_BBOX_WIDTH / 2;
 	t = y - COIN_BBOX_HEIGHT / 2;

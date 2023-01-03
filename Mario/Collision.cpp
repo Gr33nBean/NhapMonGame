@@ -139,8 +139,8 @@ LPCOLLISIONEVENT CCollision::SweptAABB(LPGAMEOBJECT objSrc, DWORD dt, LPGAMEOBJE
 	float dx = mdx - sdx;
 	float dy = mdy - sdy;
 
-	objSrc->GetBoundingBox(ml, mt, mr, mb);
-	objDest->GetBoundingBox(sl, st, sr, sb);
+	objSrc->GetBoundingBox(ml, mt, mr, mb, objSrc->isEnable);
+	objDest->GetBoundingBox(sl, st, sr, sb, objDest->isEnable);
 
 	SweptAABB(
 		ml, mt, mr, mb,

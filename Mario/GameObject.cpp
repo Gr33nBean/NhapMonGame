@@ -16,6 +16,7 @@ CGameObject::CGameObject()
 	ny = 0;
 	state = -1;
 	isDeleted = false;
+	isEnable = true;
 }
 
 void CGameObject::RenderBoundingBox()
@@ -27,7 +28,7 @@ void CGameObject::RenderBoundingBox()
 
 	float l,t,r,b; 
 
-	GetBoundingBox(l, t, r, b);
+	GetBoundingBox(l, t, r, b, this->isEnable);
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = (int)r - (int)l;

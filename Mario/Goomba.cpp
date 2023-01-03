@@ -4,25 +4,37 @@ CGoomba::CGoomba(float x, float y):Enemy(x, y)
 {
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;
+	isEnable = true;
 	SetState(GOOMBA_STATE_WALKING);
 }
 
-void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &bottom)
+void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &bottom, bool isEnable)
 {
-	if (state == GOOMBA_STATE_DIE)
+	if (isEnable == true)
 	{
-		left = x - GOOMBA_BBOX_WIDTH/2;
-		top = y - GOOMBA_BBOX_HEIGHT_DIE/2;
-		right = left + GOOMBA_BBOX_WIDTH;
-		bottom = top + GOOMBA_BBOX_HEIGHT_DIE;
+		if (state == GOOMBA_STATE_DIE)
+		{
+			left = x - GOOMBA_BBOX_WIDTH / 2;
+			top = y - GOOMBA_BBOX_HEIGHT_DIE / 2;
+			right = left + GOOMBA_BBOX_WIDTH;
+			bottom = top + GOOMBA_BBOX_HEIGHT_DIE;
+		}
+		else
+		{
+			left = x - GOOMBA_BBOX_WIDTH / 2;
+			top = y - GOOMBA_BBOX_HEIGHT / 2;
+			right = left + GOOMBA_BBOX_WIDTH;
+			bottom = top + GOOMBA_BBOX_HEIGHT;
+		}
 	}
 	else
-	{ 
-		left = x - GOOMBA_BBOX_WIDTH/2;
-		top = y - GOOMBA_BBOX_HEIGHT/2;
-		right = left + GOOMBA_BBOX_WIDTH;
-		bottom = top + GOOMBA_BBOX_HEIGHT;
+	{
+		left = 0;
+		top = 0;
+		right = 0;
+		bottom = 0;
 	}
+	
 }
 
 void CGoomba::OnNoCollision(DWORD dt)
@@ -99,16 +111,19 @@ void CGoomba::SetState(int state)
 			vy = -GOOMBA_DIE_DEFLECT_SPEED;
 			vx = 0;
 			ax = 0;
+			isEnable = false;
 			break;
 		case GOOMBA_STATE_DIE_NY:
 			y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE) / 2;
 			vx = 0;
 			vy = 0;
 			ay = 0;
+			isEnable = false;
 			break;
 		case GOOMBA_STATE_INACTIVE:
 			vx = 0;
 			ax = 0;
+			isEnable = false;
 			break;
 	}
 }

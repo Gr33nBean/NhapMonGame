@@ -50,7 +50,7 @@ public:
 	CGameObject(float x, float y) :CGameObject() { this->x = x; this->y = y; }
 
 
-	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom) = 0;
+	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom, bool isEnable) = 0;
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL) {};
 	virtual void Render() = 0;
 	virtual void SetState(int state) { this->state = state; }

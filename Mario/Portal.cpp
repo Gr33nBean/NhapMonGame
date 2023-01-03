@@ -20,7 +20,7 @@ void CPortal::RenderBoundingBox()
 
 	float l, t, r, b;
 
-	GetBoundingBox(l, t, r, b);
+	GetBoundingBox(l, t, r, b, isEnable);
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = (int)r - (int)l;
@@ -37,7 +37,7 @@ void CPortal::Render()
 	RenderBoundingBox();
 }
 
-void CPortal::GetBoundingBox(float &l, float &t, float &r, float &b)
+void CPortal::GetBoundingBox(float &l, float &t, float &r, float &b, bool isEnable)
 {
 	l = x - width/2;
 	t = y - height/2;

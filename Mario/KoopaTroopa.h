@@ -24,7 +24,7 @@ class CKoopaTroopa :public Enemy
 	float ax;
 	float ay;
 	CMario* mario;
-	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
+	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
 

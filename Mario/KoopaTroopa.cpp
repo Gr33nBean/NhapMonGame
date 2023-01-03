@@ -8,26 +8,37 @@ CKoopaTroopa::CKoopaTroopa(float x, float y) :Enemy(x, y)
 	this->ax = 0;
 	this->ay = KOOPATROOPA_GRAVITY;
 	isPickedUp = false;
+	isEnable = true;
 	SetState(KOOPATROOPA_STATE_WALKING);
 }
 
-void CKoopaTroopa::GetBoundingBox(float& left, float& top, float& right, float& bottom)
+void CKoopaTroopa::GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable)
 {
-
-	if (state == KOOPATROOPA_STATE_HIDING)
+	if (isEnable == true)
 	{
-		left = x - KOOPATROOPA_BBOX_WIDTH / 2;
-		top = y - KOOPATROOPA_BBOX_HEIGHT_HIDING / 2;
-		right = left + KOOPATROOPA_BBOX_WIDTH;
-		bottom = top + KOOPATROOPA_BBOX_HEIGHT_HIDING;
+		if (state == KOOPATROOPA_STATE_HIDING)
+		{
+			left = x - KOOPATROOPA_BBOX_WIDTH / 2;
+			top = y - KOOPATROOPA_BBOX_HEIGHT_HIDING / 2;
+			right = left + KOOPATROOPA_BBOX_WIDTH;
+			bottom = top + KOOPATROOPA_BBOX_HEIGHT_HIDING;
+		}
+		else
+		{
+			left = x - KOOPATROOPA_BBOX_WIDTH / 2;
+			top = y - KOOPATROOPA_BBOX_HEIGHT / 2;
+			right = left + KOOPATROOPA_BBOX_WIDTH;
+			bottom = top + KOOPATROOPA_BBOX_HEIGHT;
+		}
 	}
 	else
 	{
-		left = x - KOOPATROOPA_BBOX_WIDTH / 2;
-		top = y - KOOPATROOPA_BBOX_HEIGHT / 2;
-		right = left + KOOPATROOPA_BBOX_WIDTH;
-		bottom = top + KOOPATROOPA_BBOX_HEIGHT;
+		left = 0;
+		top = 0;
+		right = 0;
+		bottom = 0;
 	}
+	
 }
 
 void CKoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -81,6 +92,7 @@ void CKoopaTroopa::SetState(int state)
 			break;
 		case KOOPATROOPA_STATE_DIE_NX:
 			vy = -KOOPATROOPA_DIE_DEFLECT_SPEED;
+			isEnable = false;
 			vx = 0;
 			ax = 0;
 			break;
@@ -125,8 +137,11 @@ void CKoopaTroopa::OnCollisionWith(LPCOLLISIONEVENT e)
 		Enemy* enemy = dynamic_cast<Enemy*>(e->obj);
 		if (e->nx != 0)
 		{
+			if (isPickedUp == true)
+			{
+				this->SetState(KOOPATROOPA_STATE_DIE_NX);
+			}
 			enemy->SetDie(true);
-			this->SetState(KOOPATROOPA_STATE_DIE_NX);
 		}
 	}
 	else if (e->nx != 0)

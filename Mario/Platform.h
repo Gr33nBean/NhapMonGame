@@ -28,7 +28,7 @@ public:
 
 	void Render();
 	void Update(DWORD dt) {}
-	void GetBoundingBox(float& l, float& t, float& r, float& b);
+	void GetBoundingBox(float& l, float& t, float& r, float& b, bool isEnable);
 	void RenderBoundingBox();
 };
 
