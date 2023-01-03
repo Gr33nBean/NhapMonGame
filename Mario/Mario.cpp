@@ -75,14 +75,14 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_JUMP:
 		if (isSitting) break;
-		if (isInGround)
+		vy = -MARIO_JUMP_SPEED_Y;
+		/*if (isInGround)
 		{
-			vy = -MARIO_JUMP_SPEED_Y;
-			/*if (abs(this->vx) == MARIO_RUNNING_SPEED)
+			if (abs(this->vx) == MARIO_RUNNING_SPEED)
 				vy = -MARIO_LONG_JUMP_SPEED_Y;
 			else
-				vy = -MARIO_JUMP_SPEED_Y;*/
-		}
+				vy = -MARIO_JUMP_SPEED_Y;
+		}*/
 		break;
 
 	case MARIO_STATE_RELEASE_JUMP:
@@ -257,6 +257,8 @@ void CMario::unJump()
 	DWORD current = GetTickCount64();
 	if (current - long_jump_start < MARIO_LONG_JUMP_TIME && this->isInGround == true && isJump == true)
 	{
+		// nếu Mario chưa tiếp đất hoặc vật thì ko cho phép nhảy
+		// không cho phép nhảy ngắn khi Mario đã nhảy
 		this->SetState(MARIO_STATE_JUMP);
 		DebugOut(L"\nxyz");
 
@@ -360,7 +362,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 	{
 		if (goomba->IsDead() != true)
 		{
-			goomba->SetDie();
+			goomba->SetDie(false);
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
@@ -394,12 +396,12 @@ void CMario::OnCollisionWithKoopaTroopa(LPCOLLISIONEVENT e)
 	{
 		if (troopa->IsDead() != true)
 		{
-			troopa->SetDie();
+			troopa->SetDie(false);
 			isInGround = true;
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
-	else // hit by Troopa
+	else  // hit by Troopa
 	{
 		if (untouchable == 0)
 		{
@@ -560,7 +562,7 @@ int CMario::GetAniIdBig()
 					aniId = ID_ANI_MARIO_BIG_BRACE_RIGHT;
 				}
 			}
-			else // vx < 0
+			else if (vx < 0)
 			{
 				if (nx < 0)
 				{

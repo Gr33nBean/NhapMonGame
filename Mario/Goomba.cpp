@@ -4,7 +4,6 @@ CGoomba::CGoomba(float x, float y):Enemy(x, y)
 {
 	this->ax = 0;
 	this->ay = GOOMBA_GRAVITY;
-	die_start = -1;
 	SetState(GOOMBA_STATE_WALKING);
 }
 
@@ -37,7 +36,7 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 	if (!e->obj->IsBlocking()) return; 
 	if (dynamic_cast<CGoomba*>(e->obj)) return; 
 
-	if (e->ny != 0 )
+	if (e->ny != 0 && state != GOOMBA_STATE_DIE_NX)
 	{
 		vy = 0;
 	}
@@ -49,15 +48,18 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-	vy += ay * dt;
-	vx += ax * dt;
-
-	if ( (state==GOOMBA_STATE_DIE) && (GetTickCount64() - die_start > GOOMBA_DIE_TIMEOUT) )
+	if (state == GOOMBA_STATE_INACTIVE)
+		return;
+	
+	if (this->IsDead() == true && (GetTickCount64() - time_death > GOOMBA_INACTIVE_TIME) )
 	{
+		this->SetState(GOOMBA_STATE_INACTIVE);
 		isDeleted = true;
 		return;
 	}
 
+	vy += ay * dt;
+	vx += ax * dt;
 	CGameObject::Update(dt, coObjects);
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
@@ -65,13 +67,17 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 void CGoomba::Render()
 {
-	int aniId = ID_ANI_GOOMBA_WALKING;
-	if (state == GOOMBA_STATE_DIE) 
+	if (state != GOOMBA_STATE_INACTIVE)
 	{
-		aniId = ID_ANI_GOOMBA_DIE;
+		int aniId;
+		aniId = ID_ANI_GOOMBA_WALKING;
+		if (state == GOOMBA_STATE_DIE_NY) {
+			aniId = ID_ANI_GOOMBA_DIE;
+		}
+		CAnimations::GetInstance()->Get(aniId)->Render(x, y);
+
 	}
 
-	CAnimations::GetInstance()->Get(aniId)->Render(x,y);
 	//RenderBoundingBox();
 }
 
@@ -81,7 +87,6 @@ void CGoomba::SetState(int state)
 	switch (state)
 	{
 		case GOOMBA_STATE_DIE:
-			die_start = GetTickCount64();
 			y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE)/2;
 			vx = 0;
 			vy = 0;
@@ -90,19 +95,40 @@ void CGoomba::SetState(int state)
 		case GOOMBA_STATE_WALKING: 
 			vx = -GOOMBA_WALKING_SPEED;
 			break;
+		case GOOMBA_STATE_DIE_NX:
+			vy = -GOOMBA_DIE_DEFLECT_SPEED;
+			vx = 0;
+			ax = 0;
+			break;
+		case GOOMBA_STATE_DIE_NY:
+			y += (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE) / 2;
+			vx = 0;
+			vy = 0;
+			ay = 0;
+			break;
+		case GOOMBA_STATE_INACTIVE:
+			vx = 0;
+			ax = 0;
+			break;
 	}
 }
 
 bool CGoomba::IsDead()
 {
-	if (this->state == GOOMBA_STATE_DIE)
+	if (this->state == GOOMBA_STATE_DIE_NY || this->state == GOOMBA_STATE_DIE_NX)
 	{
 		return true;
 	}
 	return false;
 }
 
-void CGoomba::SetDie()
+void CGoomba::SetDie(bool n)
 {
-	this->SetState(GOOMBA_STATE_DIE);
+	if (n == true)
+	{
+		this->SetState(GOOMBA_STATE_DIE_NX);
+	}
+	else
+		this->SetState(GOOMBA_STATE_DIE_NY);
+	time_death = GetTickCount64();
 }

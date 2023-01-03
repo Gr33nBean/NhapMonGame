@@ -1,5 +1,6 @@
-#include "KoopaTroopa.h"
+﻿#include "KoopaTroopa.h"
 #include "debug.h"
+#include "Goomba.h"
 #include "Brick.h"
 
 CKoopaTroopa::CKoopaTroopa(float x, float y) :Enemy(x, y)
@@ -34,6 +35,8 @@ void CKoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += ay * dt;
 	vx += ax * dt;
 	Enemy::Update(dt, coObjects);
+
+	//Nếu đang rinh cái mai
 	if (isPickedUp == true)
 	{
 		if (mario->isPickingUp == true)
@@ -43,7 +46,7 @@ void CKoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			this->nx = mario->nx;
 			this->ny = mario->ny;
 		}
-		else
+		else // thả cái mai ra
 		{
 			isPickedUp = false;
 			this->SetState(KOOPATROOPA_STATE_HIDING);
@@ -76,12 +79,21 @@ void CKoopaTroopa::SetState(int state)
 			vy = 0;
 			ay = 0;
 			break;
+		case KOOPATROOPA_STATE_DIE_NX:
+			vy = -KOOPATROOPA_DIE_DEFLECT_SPEED;
+			vx = 0;
+			ax = 0;
+			break;
 	}
 }
 
-void CKoopaTroopa::SetDie()
+void CKoopaTroopa::SetDie(bool n)
 {
-	this->SetState(KOOPATROOPA_STATE_HIDING);
+	// true: nx. false = ny
+	if (n == true)
+		this->SetState(KOOPATROOPA_STATE_DIE_NX);
+	else
+		this->SetState(KOOPATROOPA_STATE_HIDING);
 }
 
 bool CKoopaTroopa::IsDead()
@@ -101,26 +113,25 @@ void CKoopaTroopa::OnNoCollision(DWORD dt)
 
 void CKoopaTroopa::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (!e->obj->IsBlocking()) return;
+	//if (!e->obj->IsBlocking()) return;
 	//if (dynamic_cast<CKoopaTroopa*>(e->obj)) return;
 
 	if (e->ny != 0)
 	{
 		vy = 0;
 	}
-	else if (isPickedUp == true)
+	else if (this->IsHiding() && dynamic_cast<Enemy*>(e->obj))
 	{
-		if (dynamic_cast<Enemy*>(e->obj))
+		Enemy* enemy = dynamic_cast<Enemy*>(e->obj);
+		if (e->nx != 0)
 		{
-			Enemy* enemy = dynamic_cast<Enemy*>(e->obj);
-			if (e->nx != 0)
-			{
-				enemy->SetDie();
-			}
+			enemy->SetDie(true);
+			this->SetState(KOOPATROOPA_STATE_DIE_NX);
 		}
 	}
 	else if (e->nx != 0)
 	{
+		// Code cái mà con rùa xanh thông minh!
 		vx = -vx;
 	}
 }
@@ -134,4 +145,11 @@ void CKoopaTroopa::IsKicked(int nx)
 	}
 	else
 		this->vx = KOOPATROOPA_BUMP_SPEED;
+}
+
+bool CKoopaTroopa::IsHiding()
+{
+	if (this->state == KOOPATROOPA_STATE_HIDING)
+		return true;
+	return false;
 }
