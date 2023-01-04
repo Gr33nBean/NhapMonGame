@@ -6,8 +6,9 @@
 
 #define ID_TEX_MARIO 0
 #define ID_TEX_ENEMY 10
+#define ID_TEX_MOREENEMY 15
 #define ID_TEX_MISC 20
-#define ID_TEX_MOREENEMY 30
+#define ID_TEX_MAP 30
 
 
 #define OBJECT_TYPE_MARIO	0

@@ -17,4 +17,5 @@ height	240
 0	textures\mario.png
 10	textures\enemies.png
 20	textures\misc.png
-30	textures\NES - Super Mario Bros 3 - Enemies.png
+15	textures\NES - Super Mario Bros 3 - Enemies.png
+30	Map\map1-1_bank.png

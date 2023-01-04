@@ -7,6 +7,7 @@
 #include "Mario.h"
 #include "Goomba.h"
 #include "KoopaTroopa.h"
+#include"Map.h"
 //#include "Koopas.h"
 
 
@@ -18,9 +19,12 @@ protected:
 
 	vector<LPGAMEOBJECT> objects;
 
+	Map* map;
+
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
 
+	void _ParseSection_MAP(string line);
 	void _ParseSection_ASSETS(string line);
 	void _ParseSection_OBJECTS(string line);
 

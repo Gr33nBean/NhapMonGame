@@ -158,6 +158,7 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="Goomba.h" />
     <ClInclude Include="KeyEventHandler.h" />
     <ClInclude Include="KoopaTroopa.h" />
+    <ClInclude Include="Map.h" />
     <ClInclude Include="Mario.h" />
     <ClInclude Include="MovingPlatform.h" />
     <ClInclude Include="Platform.h" />
@@ -184,6 +185,7 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="Goomba.cpp" />
     <ClCompile Include="KoopaTroopa.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Map.cpp" />
     <ClCompile Include="Mario.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="PlayScene.cpp" />

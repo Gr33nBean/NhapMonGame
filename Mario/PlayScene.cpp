@@ -24,6 +24,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 
 
 #define SCENE_SECTION_UNKNOWN -1
+#define SCENE_SECTION_MAP	0
 #define SCENE_SECTION_ASSETS	1
 #define SCENE_SECTION_OBJECTS	2
 
@@ -63,6 +64,7 @@ void CPlayScene::_ParseSection_ASSETS(string line)
 	if (tokens.size() < 1) return;
 
 	wstring path = ToWSTR(tokens[0]);
+
 	
 	LoadAssets(path.c_str());
 }
@@ -86,6 +88,18 @@ void CPlayScene::_ParseSection_ANIMATIONS(string line)
 	}
 
 	CAnimations::GetInstance()->Add(ani_id, ani);
+}
+
+void CPlayScene::_ParseSection_MAP(string line)
+{
+	vector<string> tokens = split(line);
+
+	if (tokens.size() < 1) return;
+	wstring path = ToWSTR(tokens[0]);
+
+	map = new Map(ID_TEX_MAP, 11, 11, 178, 45, 117);
+	map->CreateTilesFromTileSet();
+	map->LoadMatrix(path.c_str());
 }
 
 /*
@@ -236,6 +250,7 @@ void CPlayScene::Load()
 		string line(str);
 
 		if (line[0] == '#') continue;	// skip comment lines	
+		if (line == "[MAP]") { section = SCENE_SECTION_MAP; continue; };
 		if (line == "[ASSETS]") { section = SCENE_SECTION_ASSETS; continue; };
 		if (line == "[OBJECTS]") { section = SCENE_SECTION_OBJECTS; continue; };
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
@@ -245,6 +260,7 @@ void CPlayScene::Load()
 		//
 		switch (section)
 		{ 
+			case SCENE_SECTION_MAP: _ParseSection_MAP(line); break;
 			case SCENE_SECTION_ASSETS: _ParseSection_ASSETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
 		}
@@ -284,13 +300,14 @@ void CPlayScene::Update(DWORD dt)
 
 	if (cx < 0) cx = 0;
 
-	CGame::GetInstance()->SetCamPos(cx, 0.0f /*cy*/);
+	CGame::GetInstance()->SetCamPos(cx, /*0.0f*/ cy);
 
 	PurgeDeletedObjects();
 }
 
 void CPlayScene::Render()
 {
+	map->Render();
 	for (int i = 0; i < objects.size(); i++)
 		objects[i]->Render();
 }
