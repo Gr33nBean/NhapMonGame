@@ -1,23 +1,21 @@
 #include "Animations.h"
 #include "debug.h"
 
-CAnimations* CAnimations::__instance = NULL;
+Animations* Animations::__instance = NULL;
 
-CAnimations* CAnimations::GetInstance()
+
+Animations* Animations::GetInstance()
 {
-	if (__instance == NULL) __instance = new CAnimations();
+	if (__instance == NULL) __instance = new Animations();
 	return __instance;
 }
 
-void CAnimations::Add(int id, LPANIMATION ani)
+void Animations::Add(int id, LPANIMATION ani)
 {
-	if (animations[id] != NULL)
-		DebugOut(L"[WARNING] Animation %d already exists\n", id);
-
 	animations[id] = ani;
 }
 
-LPANIMATION CAnimations::Get(int id)
+LPANIMATION Animations::Get(int id)
 {
 	LPANIMATION ani = animations[id];
 	if (ani == NULL)
@@ -25,7 +23,7 @@ LPANIMATION CAnimations::Get(int id)
 	return ani;
 }
 
-void CAnimations::Clear()
+void Animations::Clear()
 {
 	for (auto x : animations)
 	{
@@ -34,4 +32,32 @@ void CAnimations::Clear()
 	}
 
 	animations.clear();
+}
+
+// AnimationSet
+AnimationSets* AnimationSets::__instance = NULL;
+
+AnimationSets::AnimationSets()
+{
+
+}
+
+AnimationSets* AnimationSets::GetInstance()
+{
+	if (__instance == NULL) __instance = new AnimationSets();
+	return __instance;
+}
+
+LPANIMATION_SET AnimationSets::Get(unsigned int id)
+{
+	LPANIMATION_SET ani_set = animation_sets[id];
+	if (ani_set == NULL)
+		DebugOut(L"[ERROR] Failed to find animation set id: %d\n", id);
+
+	return ani_set;
+}
+
+void AnimationSets::Add(int id, LPANIMATION_SET ani_set)
+{
+	animation_sets[id] = ani_set;
 }

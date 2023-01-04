@@ -1,6 +1,6 @@
 #pragma once
 #include"GameObject.h"
-class Enemy :public CGameObject
+class Enemy :public GameObject
 {
 protected:
 	DWORD time_death;

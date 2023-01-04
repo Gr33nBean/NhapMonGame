@@ -14,6 +14,8 @@ class Map
 	int TotalTiles;
 	LPTEXTURE TileSet;
 	vector<LPSPRITE> Tiles;
+	int Height = 0;
+	int Width = 0;
 public:
 	Map(int idMap, int nTitleCols, int nTitleRows, int nMapCols, int nMapRows, int nTotalTiles);
 	~Map();
@@ -22,5 +24,7 @@ public:
 	void Render();
 	int GetTotalColsOfMap() { return this->TotalColsOfMap; }
 	int GetTotalRowsOfMap() { return this->TotalRowsOfMap; }
+	int GetMapHeiht();
+	int GetMapWidth();
 };
 

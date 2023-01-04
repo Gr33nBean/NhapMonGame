@@ -6,13 +6,13 @@
 
 using namespace std;
 
-class CGameObject;
-typedef CGameObject* LPGAMEOBJECT;
+class GameObject;
+typedef GameObject* LPGAMEOBJECT;
 
-struct CCollisionEvent;
-typedef CCollisionEvent* LPCOLLISIONEVENT;
+struct CollisionEvent;
+typedef CollisionEvent* LPCOLLISIONEVENT;
 
-struct CCollisionEvent 
+struct CollisionEvent 
 {
 	LPGAMEOBJECT src_obj;		// source object : the object from which to calculate collision
 	LPGAMEOBJECT obj;			// the target object
@@ -22,7 +22,7 @@ struct CCollisionEvent
 	float dx, dy;				// *RELATIVE* movement distance between this object and obj
 	bool isDeleted;		
 
-	CCollisionEvent(float t, float nx, float ny, float dx = 0, float dy = 0, 
+	CollisionEvent(float t, float nx, float ny, float dx = 0, float dy = 0, 
 		LPGAMEOBJECT obj = NULL, LPGAMEOBJECT src_obj = NULL)
 	{
 		this->t = t;

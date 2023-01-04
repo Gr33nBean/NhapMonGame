@@ -16,15 +16,13 @@
 #define GOOMBA_STATE_DIE_NY 400
 #define GOOMBA_STATE_INACTIVE 500
 
-#define ID_ANI_GOOMBA_WALKING 5000
-#define ID_ANI_GOOMBA_DIE 5001
+#define GOOMBA_ANI_WALKING 0
+#define GOOMBA_ANI_DIE 1
 
 #define GOOMBA_INACTIVE_TIME 500
-class CGoomba : public Enemy
+class Goomba : public Enemy
 {
 public:
-	float ax;				
-	float ay; 
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom, bool isEnable);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
@@ -36,8 +34,9 @@ public:
 
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 
-	CGoomba(float x, float y);
+	Goomba(float x, float y);
 	virtual void SetState(int state);
 	virtual bool IsDead();
 	virtual void SetDie(bool n);
+	Goomba();
 };

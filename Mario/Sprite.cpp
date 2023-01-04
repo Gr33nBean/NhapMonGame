@@ -1,6 +1,6 @@
-#include "Sprite.h"
+﻿#include "Sprite.h"
 
-CSprite::CSprite(int id, int left, int top, int right, int bottom, LPTEXTURE tex)
+Sprite::Sprite(int id, int left, int top, int right, int bottom, LPTEXTURE tex)
 {
 	this->id = id;
 	this->left = left;
@@ -12,7 +12,7 @@ CSprite::CSprite(int id, int left, int top, int right, int bottom, LPTEXTURE tex
 	float texWidth = (float)tex->getWidth();
 	float texHeight = (float)tex->getHeight();
 
-	// Set the sprite�s shader resource view
+	// Set the sprite’s shader resource view
 	sprite.pTexture = tex->getShaderResourceView();
 
 	sprite.TexCoord.x = this->left / texWidth;
@@ -30,11 +30,15 @@ CSprite::CSprite(int id, int left, int top, int right, int bottom, LPTEXTURE tex
 	D3DXMatrixScaling(&this->matScaling, (FLOAT)spriteWidth, (FLOAT)spriteHeight, 1.0f);
 }
 
-void CSprite::Draw(float x, float y)
+void Sprite::Draw(int nx, float x, float y, int alpha)
 {
-	CGame* g = CGame::GetInstance();
+	//sprite.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, alpha / 255.0f);
+
+	Game* game = Game::GetInstance();
+	//game->Draw(nx, x, y, texture, left, top, right, bottom, alpha);
+	
 	float cx, cy;
-	g->GetCamPos(cx, cy);
+	game->GetCamPos(cx, cy);
 
 	cx = (FLOAT)floor(cx);
 	cy = (FLOAT)floor(cy);
@@ -44,10 +48,10 @@ void CSprite::Draw(float x, float y)
 	x = (FLOAT)floor(x);
 	y = (FLOAT)floor(y);
 
-	D3DXMatrixTranslation(&matTranslation, x - cx, g->GetBackBufferHeight() - y + cy, 0.1f);
+	D3DXMatrixTranslation(&matTranslation, x - cx, game->GetScreenHeight() - y + cy, 0.1f);
+	
+	this->sprite.matWorld = (this->matScaling * matTranslation );
 
-	this->sprite.matWorld = (this->matScaling * matTranslation);
-
-	g->GetSpriteHandler()->DrawSpritesImmediate(&sprite, 1, 0, 0);
+	game->GetSpriteHandler()->DrawSpritesImmediate(&sprite, 1, 0, 0);
 }
 

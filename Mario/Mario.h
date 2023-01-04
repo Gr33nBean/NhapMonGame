@@ -7,11 +7,8 @@
 #include "debug.h"
 
 // ---- Thông số ----
-#define MARIO_ACCEL_WALK_X	0.0005f
-#define MARIO_ACCEL_RUN_X	0.0007f
 
 #define MARIO_WALKING_SPEED		0.1f
-#define MARIO_RUNNING_SPEED		0.2f
 
 #define MARIO_JUMP_SPEED_Y		0.5f
 #define MARIO_LONG_JUMP_SPEED_Y	0.6f
@@ -30,184 +27,96 @@
 // ---- State ----
 
 #define MARIO_STATE_IDLE			0
-#define MARIO_STATE_WALKING_RIGHT	100
-#define MARIO_STATE_WALKING_LEFT	200
+#define MARIO_STATE_WALKING			100
+#define MARIO_STATE_RUNNING			200
 
-#define MARIO_STATE_JUMP			300
-#define MARIO_STATE_DIE				400
-#define MARIO_STATE_LONG_JUMP		500
+#define MARIO_STATE_JUMPING			300
+#define MARIO_STATE_LONG_JUMPING	400
+#define MARIO_STATE_BRAKING			500
+#define MARIO_STATE_KICK			600
+#define MARIO_STATE_PICK			700
+#define MARIO_STATE_DEATH			800
+
 #define MARIO_STATE_RELEASE_JUMP    301
-
-#define MARIO_STATE_RUNNING_RIGHT	600
-#define MARIO_STATE_RUNNING_LEFT	700
-
-#define MARIO_STATE_BRAKE_RIGHT		800
-#define MARIO_STATE_BRAKE_LEFT		900
-#define MARIO_STATE_KICK			1000
-#define MARIO_STATE_PICK_UP			1100
 
 #define MARIO_STATE_SIT				2000
 #define MARIO_STATE_SIT_RELEASE		2001
 
 
-#pragma region ANIMATION_ID
+#define MARIO_ANI_SMALL_IDLE	0
+#define MARIO_ANI_BIG_IDLE		1
+#define MARIO_ANI_FIRE_IDLE		2
+#define MARIO_ANI_RACCOON_IDLE	3
 
-// BIG MARIO
-#define ID_ANI_MARIO_BIG_IDLE_RIGHT 400
-#define ID_ANI_MARIO_BIG_IDLE_LEFT 401
+#define MARIO_ANI_SMALL_WALKING	4
+#define MARIO_ANI_BIG_WALKING	5
+#define MARIO_ANI_FIRE_WALKING	6
+#define MARIO_ANI_RACCOON_WALKING	7
 
-#define ID_ANI_MARIO_BIG_WALKING_RIGHT 500
-#define ID_ANI_MARIO_BIG_WALKING_LEFT 501
-#define ID_ANI_MARIO_BIG_KICK_RIGHT 502
-#define ID_ANI_MARIO_BIG_KICK_LEFT 503
-#define ID_ANI_MARIO_BIG_PICK_RIGHT 504
-#define ID_ANI_MARIO_BIG_PICK_LEFT 505
+#define MARIO_ANI_BIG_JUMPING	8
+#define MARIO_ANI_SMALL_JUMPING	9
+#define MARIO_ANI_FIRE_JUMPING	10
+#define MARIO_ANI_RACCOON_JUMPING	11
 
-#define ID_ANI_MARIO_BIG_RUNNING_RIGHT 600
-#define ID_ANI_MARIO_BIG_RUNNING_LEFT 601
+//#define MARIO_ANI_BIG_RUNNING	8
+//#define MARIO_ANI_SMALL_RUNNING	9
+//#define MARIO_ANI_FIRE_RUNNING	10
+//#define MARIO_ANI_RACCOON_RUNNING	11
+//
 
-#define ID_ANI_MARIO_BIG_JUMP_WALK_RIGHT 700
-#define ID_ANI_MARIO_BIG_JUMP_WALK_LEFT 701
-
-#define ID_ANI_MARIO_BIG_JUMP_RUN_RIGHT 800
-#define ID_ANI_MARIO_BIG_JUMP_RUN_LEFT 801
-
-#define ID_ANI_MARIO_BIG_SIT_RIGHT 900
-#define ID_ANI_MARIO_BIG_SIT_LEFT 901
-
-#define ID_ANI_MARIO_BIG_BRACE_RIGHT 1000
-#define ID_ANI_MARIO_BIG_BRACE_LEFT 1001
-
-#define ID_ANI_MARIO_DIE 999
-
-// SMALL MARIO
-#define ID_ANI_MARIO_SMALL_IDLE_RIGHT 1100
-#define ID_ANI_MARIO_SMALL_IDLE_LEFT 1102
-
-#define ID_ANI_MARIO_SMALL_WALKING_RIGHT 1200
-#define ID_ANI_MARIO_SMALL_WALKING_LEFT 1201
-#define ID_ANI_MARIO_SMALL_KICK_RIGHT 1202
-#define ID_ANI_MARIO_SMALL_KICK_LEFT 1203
-#define ID_ANI_MARIO_SMALL_PICK_RIGHT 1204
-#define ID_ANI_MARIO_SMALL_PICK_LEFT 1205
-
-#define ID_ANI_MARIO_SMALL_RUNNING_RIGHT 1300
-#define ID_ANI_MARIO_SMALL_RUNNING_LEFT 1301
-
-#define ID_ANI_MARIO_SMALL_BRACE_RIGHT 1400
-#define ID_ANI_MARIO_SMALL_BRACE_LEFT 1401
-
-#define ID_ANI_MARIO_SMALL_JUMP_WALK_RIGHT 1500
-#define ID_ANI_MARIO_SMALL_JUMP_WALK_LEFT 1501
-
-#define ID_ANI_MARIO_SMALL_JUMP_RUN_RIGHT 1600
-#define ID_ANI_MARIO_SMALL_JUMP_RUN_LEFT 1601
+//
+//#define MARIO_ANI_BIG_BRAKING	16
+//#define MARIO_ANI_SMALL_BRAKING	17
+//#define MARIO_ANI_FIRE_BRAKING	18
+//#define MARIO_ANI_RACCOON_BRAKING	19
+//
+//#define MARIO_ANI_BIG_KICK_SHELL	20
+//#define MARIO_ANI_SMALL_KICK_SHELL	21
+//#define MARIO_ANI_FIRE_KICK_SHELL	22
+//#define MARIO_ANI_RACCOON_KICK_SHELL	22
+//
+//
+//#define MARIO_ANI_BIG_PICK_SHELL	23
+//#define MARIO_ANI_SMALL_PICK_SHELL	24
+//#define MARIO_ANI_FIRE_PICK_SHELL	25
+//#define MARIO_ANI_RACCOON_PICK_SHELL	26
+#define MARIO_ANI_DIE				12
 
 
-// FIRE MARIO
-#define ID_ANI_MARIO_FIRE_IDLE_RIGHT 2100
-#define ID_ANI_MARIO_FIRE_IDLE_LEFT 2102
-
-#define ID_ANI_MARIO_FIRE_WALKING_RIGHT 2200
-#define ID_ANI_MARIO_FIRE_WALKING_LEFT 2201
-#define ID_ANI_MARIO_FIRE_KICK_RIGHT 2202
-#define ID_ANI_MARIO_FIRE_KICK_LEFT 2203
-#define ID_ANI_MARIO_FIRE_PICK_RIGHT 2204
-#define ID_ANI_MARIO_FIRE_PICK_LEFT 2205
-
-#define ID_ANI_MARIO_FIRE_RUNNING_RIGHT 2300
-#define ID_ANI_MARIO_FIRE_RUNNING_LEFT 2301
-
-#define ID_ANI_MARIO_FIRE_JUMP_WALK_RIGHT 2400
-#define ID_ANI_MARIO_FIRE_JUMP_WALK_LEFT 2401
-
-#define ID_ANI_MARIO_FIRE_JUMP_RUN_RIGHT 2500
-#define ID_ANI_MARIO_FIRE_JUMP_RUN_LEFT 2501
-
-#define ID_ANI_MARIO_FIRE_SIT_RIGHT 2600
-#define ID_ANI_MARIO_FIRE_SIT_LEFT 2601
-
-#define ID_ANI_MARIO_FIRE_BRACE_RIGHT 2700
-#define ID_ANI_MARIO_FIRE_BRACE_LEFT 2701
-
-// RACCOON MARIO
-#define ID_ANI_MARIO_RACCOON_IDLE_RIGHT 3100
-#define ID_ANI_MARIO_RACCOON_IDLE_LEFT 3102
-
-#define ID_ANI_MARIO_RACCOON_WALKING_RIGHT 3200
-#define ID_ANI_MARIO_RACCOON_WALKING_LEFT 3201
-#define ID_ANI_MARIO_RACCOON_KICK_RIGHT 3202
-#define ID_ANI_MARIO_RACCOON_KICK_LEFT 3203
-#define ID_ANI_MARIO_RACCOON_PICK_RIGHT 3204
-#define ID_ANI_MARIO_RACCOON_PICK_LEFT 3205
-
-#define ID_ANI_MARIO_RACCOON_RUNNING_RIGHT 3300
-#define ID_ANI_MARIO_RACCOON_RUNNING_LEFT 3301
-
-#define ID_ANI_MARIO_RACCOON_JUMP_WALK_RIGHT 3400
-#define ID_ANI_MARIO_RACCOON_JUMP_WALK_LEFT 3401
-
-#define ID_ANI_MARIO_RACCOON_JUMP_RUN_RIGHT 3500
-#define ID_ANI_MARIO_RACCOON_JUMP_RUN_LEFT 3501
-
-#define ID_ANI_MARIO_RACCOON_SIT_RIGHT 3600
-#define ID_ANI_MARIO_RACCOON_SIT_LEFT 3601
-
-#define ID_ANI_MARIO_RACCOON_BRACE_RIGHT 3700
-#define ID_ANI_MARIO_RACCOON_BRACE_LEFT 3701
-#pragma endregion
-
-#define GROUND_Y 160.0f
+#define	MARIO_SMALL_FORM	0
+#define	MARIO_BIG_FORM		1
+#define MARIO_FIRE_FORM		2
+#define MARIO_RACCOON_FORM	3
 
 
-#define	MARIO_LEVEL_SMALL	1
-#define	MARIO_LEVEL_BIG		2
-#define MARIO_LEVEL_FIRE	3
-#define MARIO_LEVEL_RACCOON	4
+#define MARIO_BIG_BBOX_WIDTH  16
+#define MARIO_BIG_BBOX_HEIGHT 32
 
+#define MARIO_SMALL_BBOX_WIDTH  16
+#define MARIO_SMALL_BBOX_HEIGHT 16
 
-#define MARIO_BIG_BBOX_WIDTH  14
-#define MARIO_BIG_BBOX_HEIGHT 24
-#define MARIO_BIG_SITTING_BBOX_WIDTH  14
-#define MARIO_BIG_SITTING_BBOX_HEIGHT 16
+#define MARIO_FIRE_BBOX_WIDTH 16
+#define MARIO_FIRE_BBOX_HEIGHT 32
 
-#define MARIO_SIT_HEIGHT_ADJUST ((MARIO_BIG_BBOX_HEIGHT-MARIO_BIG_SITTING_BBOX_HEIGHT)/2)
-
-#define MARIO_SMALL_BBOX_WIDTH  13
-#define MARIO_SMALL_BBOX_HEIGHT 12
-
-#define MARIO_FIRE_BBOX_WIDTH 15
-#define MARIO_FIRE_BBOX_HEIGHT 27
-#define MARIO_FIRE_SITTING_BBOX_WIDTH  15
-#define MARIO_FIRE_SITTING_BBOX_HEIGHT 17
-
-#define MARIO_RACCOON_BBOX_WIDTH 23
-#define MARIO_RACCOON_BBOX_HEIGHT 28
-#define MARIO_RACCOON_SITTING_BBOX_WIDTH  20
-#define MARIO_RACCOON_SITTING_BBOX_HEIGHT 18
-
+#define MARIO_RACCOON_BBOX_WIDTH 24
+#define MARIO_RACCOON_BBOX_HEIGHT 32
 
 #define MARIO_UNTOUCHABLE_TIME 1000
 #define MARIO_LONG_JUMP_TIME 200
 
-class CMario : public CGameObject
+class Mario : public GameObject
 {
-	int level;
+	int form;
 	int untouchable;
-	ULONGLONG untouchable_start;
-	BOOLEAN isInGround;
-
-	BOOLEAN isSitting;
-	float maxVx;
-	float ax;				// acceleration on x 
-	float ay;				// acceleration on y 
-
+	DWORD untouchable_start;
 	DWORD stack_time_start;
 	int power_melter_stack;
 	int jump_stack;
 	DWORD long_jump_start; // tính khi nhấn giữ nút tính stack
+	BOOLEAN isInGround;
 
-
+	BOOLEAN isSitting;
+	
 	int coin; 
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
@@ -215,56 +124,56 @@ class CMario : public CGameObject
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
 	void OnCollisionWithPortal(LPCOLLISIONEVENT e);
 
-	int GetAniIdBig();
+	/*int GetAniIdBig();
 	int GetAniIdSmall();
 	int GetAniIdFire();
-	int GetAniIdRaccoon();
+	int GetAniIdRaccoon();*/
 
 public:
 	bool isJump;
 	bool isPickingUp;
-	CMario(float x, float y) : CGameObject(x, y)
+	Mario() : GameObject()
 	{
-		level = MARIO_LEVEL_RACCOON;
+		
 		untouchable = 0;
-		untouchable_start = -1;
-		isInGround = false;
-
-		isSitting = false;
-		maxVx = 0.0f;
-		ax = 0.0f;
-		ay = MARIO_GRAVITY; 
-
-		coin = 0;
-
-
 		isJump = false;
 		power_melter_stack = 1;
+		form = MARIO_BIG_FORM;
+
+		isSitting = false;
 	}
-	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
+	Mario(float x, float y)
+	{
+		this->x = x;
+		this->y = y;
+		vx = vy = 0;
+		nx = 1;
+		form = MARIO_BIG_FORM;
+		isEnable = true;
+
+		isSitting = false;		
+	}
+
+	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	void Render();
 	void SetState(int state);
 	void SetLevel(int l);
-	
+	void SetDirect(bool nx);
 
 	int IsCollidable()
 	{ 
-		return (state != MARIO_STATE_DIE); 
+		return (state != MARIO_STATE_DEATH); 
 	}
 
-	int IsBlocking() { return (state != MARIO_STATE_DIE && untouchable==0); }
+	int IsBlocking() { return (state != MARIO_STATE_DEATH && untouchable==0); }
 
 	void OnNoCollision(DWORD dt);
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
-
-	void StartJumping() { long_jump_start = GetTickCount64(); isInGround = false; isJump = true; }
-
+	void UpForm();
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable);
 
-	void Jump();
-	void unJump();
 	void FillUpPowerMelter();
 	void LosePowerMelter();
 	void Information();

@@ -9,17 +9,17 @@ using namespace std;
 /*
 	Manage texture database
 */
-class CTextures
+class Textures
 {
-	static CTextures* __instance;
+	static Textures* __instance;
 
 	unordered_map<int, LPTEXTURE> textures;
 
 public:
-	CTextures();
-	void Add(int id, LPCWSTR filePath);
+	Textures();
+	void Add(int id, LPCWSTR filePath, D3DCOLOR transparentColor);
 	LPTEXTURE Get(unsigned int i);
 	void Clear();
 
-	static CTextures* GetInstance();
+	static Textures* GetInstance();
 };

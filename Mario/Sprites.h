@@ -12,17 +12,18 @@ using namespace std;
 /*
 	Manage sprite database
 */
-class CSprites
+class Sprites
 {
-	static CSprites* __instance;
+	static Sprites* __instance;
 
 	unordered_map<int, LPSPRITE> sprites;
 
 public:
 	void Add(int id, int left, int top, int right, int bottom, LPTEXTURE tex);
 	LPSPRITE Get(int id);
+	LPSPRITE& operator[](int id) { return sprites[id]; }
 	void Clear();
 
-	static CSprites* GetInstance();
+	static Sprites* GetInstance();
 };
 

@@ -5,7 +5,7 @@ Enemy::Enemy()
 
 }
 
-Enemy::Enemy(float x, float y) :CGameObject(x, y)
+Enemy::Enemy(float x, float y) :GameObject(x, y)
 {
 
 }
@@ -17,12 +17,12 @@ Enemy::~Enemy()
 
 void Enemy::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	CGameObject::Update(dt, coObjects);
+	GameObject::Update(dt, coObjects);
 }
 
 void Enemy::SetState(int state)
 {
-	CGameObject::SetState(state);
+	GameObject::SetState(state);
 }
 
 void Enemy::SetEntryPosition(int x, int y)

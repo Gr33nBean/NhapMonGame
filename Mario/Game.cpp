@@ -1,4 +1,4 @@
-#include <fstream>
+﻿#include <fstream>
 
 #include "Game.h"
 #include "debug.h"
@@ -7,15 +7,16 @@
 #include "Texture.h"
 #include "Animations.h"
 #include "PlayScene.h"
+#include <d3dx9.h>
 
-CGame * CGame::__instance = NULL;
+Game * Game::__instance = NULL;
 
 /*
 	Initialize DirectX, create a Direct3D device for rendering within the window, initial Sprite library for
 	rendering 2D images
 	- hWnd: Application window handle
 */
-void CGame::Init(HWND hWnd, HINSTANCE hInstance)
+void Game::Init(HWND hWnd, HINSTANCE hInstance)
 {
 	this->hWnd = hWnd;
 	this->hInstance = hInstance;
@@ -24,8 +25,8 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 	RECT r;
 	GetClientRect(hWnd, &r);
 
-	backBufferWidth = r.right + 1;
-	backBufferHeight = r.bottom + 1;
+	screen_width = r.right + 1;
+	screen_height = r.bottom + 1;
 
 	DebugOut(L"[INFO] Window's client area: width= %d, height= %d\n", r.right - 1, r.bottom - 1);
 
@@ -35,8 +36,8 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 
 	// Fill in the needed values
 	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Width = backBufferWidth;
-	swapChainDesc.BufferDesc.Height = backBufferHeight;
+	swapChainDesc.BufferDesc.Width = screen_width;
+	swapChainDesc.BufferDesc.Height = screen_height;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -86,8 +87,8 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 
 	// create and set the viewport
 	D3D10_VIEWPORT viewPort;
-	viewPort.Width = backBufferWidth;
-	viewPort.Height = backBufferHeight;
+	viewPort.Width = screen_width;
+	viewPort.Height = screen_height;
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
 	viewPort.TopLeftX = 0;
@@ -116,7 +117,7 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 	pD3DDevice->CreateSamplerState(&desc, &this->pPointSamplerState);
 
 	// create the sprite object to handle sprite drawing 
-	hr = D3DX10CreateSprite(pD3DDevice, 0, &spriteObject);
+	hr = D3DX10CreateSprite(pD3DDevice, 0, &spriteHandler);
 
 	if (hr != S_OK)
 	{
@@ -134,7 +135,7 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 		(float)viewPort.Height,
 		0.1f,
 		10);
-	hr = spriteObject->SetProjectionTransform(&matProjection);
+	hr = spriteHandler->SetProjectionTransform(&matProjection);
 
 	// Initialize the blend state for alpha drawing
 	D3D10_BLEND_DESC StateDesc;
@@ -155,19 +156,12 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 	return;
 }
 
-void CGame::SetPointSamplerState()
-{
-	pD3DDevice->VSSetSamplers(0, 1, &pPointSamplerState);
-	pD3DDevice->GSSetSamplers(0, 1, &pPointSamplerState);
-	pD3DDevice->PSSetSamplers(0, 1, &pPointSamplerState);
-}
-
 /*
 	Draw the whole texture or part of texture onto screen
 	NOTE: This function is very inefficient because it has to convert
 	from texture to sprite every time we need to draw it
 */
-void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect, float alpha, int sprite_width, int sprite_height)
+void Game::Draw(float x, float y, LPTEXTURE tex, RECT* rect, float alpha, int sprite_width, int sprite_height)
 {
 	if (tex == NULL) return;
 
@@ -176,7 +170,7 @@ void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect, float alpha, int s
 
 	D3DX10_SPRITE sprite;
 
-	// Set the sprite�s shader resource view
+	// Set the sprite’s shader resource view
 	sprite.pTexture = tex->getShaderResourceView();
 
 	if (rect == NULL)
@@ -220,22 +214,103 @@ void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect, float alpha, int s
 	D3DXMATRIX matTranslation;
 
 	// Create the translation matrix
-	D3DXMatrixTranslation(&matTranslation, x, (backBufferHeight - y), 0.1f);
+	D3DXMatrixTranslation(&matTranslation, x, (screen_height - y), 0.1f);
 
 	// Scale the sprite to its correct width and height because by default, DirectX draws it with width = height = 1.0f 
 	D3DXMATRIX matScaling;
 	D3DXMatrixScaling(&matScaling, (FLOAT)spriteWidth, (FLOAT)spriteHeight, 1.0f);
 
-	// Setting the sprite�s position and size
+	// Setting the sprite’s position and size
 	sprite.matWorld = (matScaling * matTranslation);
 
-	spriteObject->DrawSpritesImmediate(&sprite, 1, 0, 0);
+	spriteHandler->DrawSpritesImmediate(&sprite, 1, 0, 0);
+}
+
+void Game::Draw(int nx, float x, float y, LPTEXTURE texture, int left, int top, int right, int bottom, int alpha)
+{
+
+	if (texture == NULL) return;
+
+	int spriteWidth = 0;
+	int spriteHeight = 0;
+
+	RECT r;
+	r.left = left;
+	r.top = top;
+	r.right = right;
+	r.bottom = bottom;
+	RECT* rect = &r;
+
+	D3DX10_SPRITE sprite;
+
+	// Set the sprite’s shader resource view
+	sprite.pTexture = texture->getShaderResourceView();
+
+	if (rect == NULL)
+	{
+		// top-left location in U,V coords
+		sprite.TexCoord.x = 0;
+		sprite.TexCoord.y = 0;
+
+		// Determine the texture size in U,V coords
+		sprite.TexSize.x = 1.0f;
+		sprite.TexSize.y = 1.0f;
+
+		if (spriteWidth == 0) spriteWidth = texture->getWidth();
+		if (spriteHeight == 0) spriteHeight = texture->getHeight();
+	}
+	else
+	{
+		sprite.TexCoord.x = rect->left / (float)texture->getWidth();
+		sprite.TexCoord.y = rect->top / (float)texture->getHeight();
+
+		if (spriteWidth == 0) spriteWidth = (rect->right - rect->left + 1);
+		if (spriteHeight == 0) spriteHeight = (rect->bottom - rect->top + 1);
+
+		sprite.TexSize.x = spriteWidth / (float)texture->getWidth();
+		sprite.TexSize.y = spriteHeight / (float)texture->getHeight();
+	}
+
+	// Set the texture index. Single textures will use 0
+	sprite.TextureIndex = 0;
+
+	// The color to apply to this sprite, full color applies white.
+	//sprite.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	sprite.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, alpha/255.0f );
+
+
+	// calculate position of object in real world
+	D3DXVECTOR3 p(x - cam_x, y - cam_y, 0);
+
+	// flip sprite, using nx parameter
+
+	D3DXMATRIX oldTransform;
+	D3DXMATRIX newTransform;
+
+	spriteHandler->GetProjectionTransform(&oldTransform);
+
+	D3DXVECTOR2 center = D3DXVECTOR2(p.x + (right - left) / 2, p.y + (bottom - top) / 2);
+	D3DXVECTOR2 rotate = D3DXVECTOR2(nx > 0 ? -1 : 1, 1);
+
+	// Xây dựng một ma trận 2D lưu thông tin biến đổi (scale, rotate)
+	D3DXMatrixTransformation2D(&newTransform, &center, 0.0f, &rotate, NULL, 0.0f, NULL);
+
+	// Cần nhân với ma trận cũ để tính ma trận biến đổi cuối cùng
+	D3DXMATRIX finalTransform = newTransform * oldTransform;
+
+	sprite.matWorld = finalTransform;
+
+	spriteHandler->SetProjectionTransform(&finalTransform);
+
+	spriteHandler->DrawSpritesImmediate(&sprite, 1, 0, 0);
+
+	spriteHandler->SetProjectionTransform(&oldTransform);
 }
 
 /*
 	Utility function to wrap D3DXCreateTextureFromFileEx
 */
-LPTEXTURE CGame::LoadTexture(LPCWSTR texturePath)
+LPTEXTURE Game::LoadTexture(LPCWSTR texturePath)
 {
 	ID3D10Resource* pD3D10Resource = NULL;
 	ID3D10Texture2D* tex = NULL;
@@ -315,15 +390,15 @@ LPTEXTURE CGame::LoadTexture(LPCWSTR texturePath)
 
 	DebugOut(L"[INFO] Texture loaded Ok from file: %s \n", texturePath);
 
-	return new CTexture(tex, gSpriteTextureRV);
+	return new Texture(tex, gSpriteTextureRV);
 }
 
-int CGame::IsKeyDown(int KeyCode)
+int Game::IsKeyDown(int KeyCode)
 {
 	return (keyStates[KeyCode] & 0x80) > 0;
 }
 
-void CGame::InitKeyboard()
+void Game::InitKeyboard()
 {
 	HRESULT hr = DirectInput8Create(this->hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (VOID**)&di, NULL);
 	if (hr != DI_OK)
@@ -381,7 +456,7 @@ void CGame::InitKeyboard()
 	DebugOut(L"[INFO] Keyboard has been initialized successfully\n");
 }
 
-void CGame::ProcessKeyboard()
+void Game::ProcessKeyboard()
 {
 	HRESULT hr;
 
@@ -438,7 +513,7 @@ void CGame::ProcessKeyboard()
 #define GAME_FILE_SECTION_TEXTURES 3
 
 
-void CGame::_ParseSection_SETTINGS(string line)
+void Game::_ParseSection_SETTINGS(string line)
 {
 	vector<string> tokens = split(line);
 
@@ -449,7 +524,7 @@ void CGame::_ParseSection_SETTINGS(string line)
 		DebugOut(L"[ERROR] Unknown game setting: %s\n", ToWSTR(tokens[0]).c_str());
 }
 
-void CGame::_ParseSection_SCENES(string line)
+void Game::_ParseSection_SCENES(string line)
 {
 	vector<string> tokens = split(line);
 
@@ -457,14 +532,14 @@ void CGame::_ParseSection_SCENES(string line)
 	int id = atoi(tokens[0].c_str());
 	LPCWSTR path = ToLPCWSTR(tokens[1]);   // file: ASCII format (single-byte char) => Wide Char
 
-	LPSCENE scene = new CPlayScene(id, path);
+	LPSCENE scene = new PlayScene(id, path);
 	scenes[id] = scene;
 }
 
 /*
 	Load game campaign file and load/initiate first scene
 */
-void CGame::Load(LPCWSTR gameFile)
+void Game::Load(LPCWSTR gameFile)
 {
 	DebugOut(L"[INFO] Start loading game file : %s\n", gameFile);
 
@@ -508,7 +583,7 @@ void CGame::Load(LPCWSTR gameFile)
 	SwitchScene();
 }
 
-void CGame::SwitchScene()
+void Game::SwitchScene()
 {
 	if (next_scene < 0 || next_scene == current_scene) return; 
 
@@ -516,8 +591,8 @@ void CGame::SwitchScene()
 
 	scenes[current_scene]->Unload();
 
-	CSprites::GetInstance()->Clear();
-	CAnimations::GetInstance()->Clear();
+	Sprites::GetInstance()->Clear();
+	Animations::GetInstance()->Clear();
 
 	current_scene = next_scene;
 	LPSCENE s = scenes[next_scene];
@@ -525,37 +600,40 @@ void CGame::SwitchScene()
 	s->Load();
 }
 
-void CGame::InitiateSwitchScene(int scene_id)
+void Game::InitiateSwitchScene(int scene_id)
 {
 	next_scene = scene_id;
 }
 
 
-void CGame::_ParseSection_TEXTURES(string line)
+void Game::_ParseSection_TEXTURES(string line)
 {
 	vector<string> tokens = split(line);
 
-	if (tokens.size() < 2) return;
+	if (tokens.size() < 5) return; // skip invalid lines
 
 	int texID = atoi(tokens[0].c_str());
 	wstring path = ToWSTR(tokens[1]);
+	int R = atoi(tokens[2].c_str());
+	int G = atoi(tokens[3].c_str());
+	int B = atoi(tokens[4].c_str());
 
-	CTextures::GetInstance()->Add(texID, path.c_str());
+	Textures::GetInstance()->Add(texID, path.c_str(), D3DCOLOR_XRGB(R, G, B));
 }
 
 
-CGame::~CGame()
+Game::~Game()
 {
 	pBlendStateAlpha->Release();
-	spriteObject->Release();
+	spriteHandler->Release();
 	pRenderTargetView->Release();
 	pSwapChain->Release();
 	pD3DDevice->Release();
 }
 
-CGame* CGame::GetInstance()
+Game* Game::GetInstance()
 {
-	if (__instance == NULL) __instance = new CGame();
+	if (__instance == NULL) __instance = new Game();
 	return __instance;
 }
 

@@ -14,12 +14,15 @@ using namespace std;
 #define ID_TEX_BBOX -100		// special texture to draw object bounding box
 #define BBOX_ALPHA 0.25f		// Bounding box transparency
 
-class CGameObject
+class GameObject
 {
 public:
 
 	float x; 
 	float y;
+
+	float dx;	// dx = vx*dt
+	float dy;	// dy = vy*dt
 
 	float vx;
 	float vy;
@@ -29,6 +32,10 @@ public:
 
 	int state;
 	bool isEnable;
+
+	DWORD dt;
+
+	LPANIMATION_SET animation_set;
 
 	bool isDeleted; 
 
@@ -41,19 +48,23 @@ public:
 	bool IsEnable() { return this->isEnable; };
 
 	int GetState() { return this->state; }
+	virtual void SetState(int state) { this->state = state; }
+
 	virtual void Delete() { isDeleted = true;  }
 	bool IsDeleted() { return isDeleted; }
 
 	void RenderBoundingBox();
 
-	CGameObject();
-	CGameObject(float x, float y) :CGameObject() { this->x = x; this->y = y; }
+	void SetAnimationSet(LPANIMATION_SET ani_set) { animation_set = ani_set; }
+
+	GameObject();
+	GameObject(float x, float y) :GameObject() { this->x = x; this->y = y; }
 
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom, bool isEnable) = 0;
-	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL) {};
+	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render() = 0;
-	virtual void SetState(int state) { this->state = state; }
+	
 
 	//
 	// Collision ON or OFF ? This can change depending on object's state. For example: die
@@ -69,7 +80,7 @@ public:
 	// Is this object blocking other object? If YES, collision framework will automatically push the other object
 	virtual int IsBlocking() { return 1; }
 
-	~CGameObject();
+	~GameObject();
 
 	static bool IsDeleted(const LPGAMEOBJECT &o) { return o->isDeleted; }
 };

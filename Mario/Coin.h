@@ -10,9 +10,9 @@
 #define COIN_BBOX_WIDTH 10
 #define COIN_BBOX_HEIGHT 16
 
-class CCoin : public CGameObject {
+class CCoin : public GameObject {
 public:
-	CCoin(float x, float y) : CGameObject(x, y) {}
+	CCoin(float x, float y) : GameObject(x, y) {}
 	void Render();
 	void Update(DWORD dt) {}
 	void GetBoundingBox(float& l, float& t, float& r, float& b, bool isEnable);

@@ -27,30 +27,26 @@ HOW TO INSTALL Microsoft.DXSDK.D3DX
 #include <list>
 
 #include "debug.h"
+#include "Utils.h"
 #include "Game.h"
 #include "GameObject.h"
 #include "Textures.h"
 #include "Animation.h"
 #include "Animations.h"
-
-#include "Mario.h"
-#include "Brick.h"
-#include "Goomba.h"
-#include "Coin.h"
-#include "Platform.h"
-
-#include "SampleKeyEventHandler.h"
+#include "Map.h"
+#include "PlayScene.h"
 
 #include "AssetIDs.h"
 
-#define WINDOW_CLASS_NAME L"SampleWindow"
-#define MAIN_WINDOW_TITLE L"04 - Collision"
+#define WINDOW_CLASS_NAME L"SuperMarioBros3"
+#define MAIN_WINDOW_TITLE L"Super Mario Bros 3"
 #define WINDOW_ICON_PATH L"mario.ico"
 
-#define BACKGROUND_COLOR D3DXCOLOR(200.0f/255, 200.0f/255, 255.0f/255, 0.0f)
+#define BACKGROUND_COLOR D3DXCOLOR(181.0f/255, 236.0f/255, 243.0f/255, 0.0f)
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
+
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -71,7 +67,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 */
 void Update(DWORD dt)
 {
-	CGame::GetInstance()->GetCurrentScene()->Update(dt);
+	Game::GetInstance()->GetCurrentScene()->Update(dt);
 }
 
 /*
@@ -79,7 +75,7 @@ void Update(DWORD dt)
 */
 void Render()
 {
-	CGame* g = CGame::GetInstance();
+	Game* g = Game::GetInstance();
 
 	ID3D10Device* pD3DDevice = g->GetDirect3DDevice();
 	IDXGISwapChain* pSwapChain = g->GetSwapChain();
@@ -93,7 +89,7 @@ void Render()
 	FLOAT NewBlendFactor[4] = { 0,0,0,0 };
 	pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
 
-	CGame::GetInstance()->GetCurrentScene()->Render();
+	Game::GetInstance()->GetCurrentScene()->Render();
 
 	spriteHandler->End();
 	pSwapChain->Present(0, 0);
@@ -173,11 +169,11 @@ int Run()
 		{
 			frameStart = now;
 
-			CGame::GetInstance()->ProcessKeyboard();			
+			Game::GetInstance()->ProcessKeyboard();			
 			Update(dt);
 			Render();
 
-			CGame::GetInstance()->SwitchScene();
+			Game::GetInstance()->SwitchScene();
 		}
 		else
 			Sleep(tickPerFrame - dt);	
@@ -196,7 +192,7 @@ int WINAPI WinMain(
 
 	SetDebugWindow(hWnd);
 
-	LPGAME game = CGame::GetInstance();
+	LPGAME game = Game::GetInstance();
 	game->Init(hWnd, hInstance);
 	game->InitKeyboard();
 

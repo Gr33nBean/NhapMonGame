@@ -11,15 +11,16 @@
 #include "Platform.h"
 #include "MovingPlatform.h"
 
-#include "SampleKeyEventHandler.h"
+#include "PlaySceneKeyHandler.h"
+#include <d3dx9.h>
 
 using namespace std;
 
-CPlayScene::CPlayScene(int id, LPCWSTR filePath):
-	CScene(id, filePath)
+PlayScene::PlayScene(int id, LPCWSTR filePath):
+	Scene(id, filePath)
 {
-	player = NULL;
-	key_handler = new CSampleKeyHandler(this);
+	//player = NULL;
+	key_handler = new PlaySceneKeyHandler(this);
 }
 
 
@@ -31,10 +32,11 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define ASSETS_SECTION_UNKNOWN -1
 #define ASSETS_SECTION_SPRITES 1
 #define ASSETS_SECTION_ANIMATIONS 2
+#define ASSETS_SECTION_ANIMATION_SETS 3
 
 #define MAX_SCENE_LINE 1024
 
-void CPlayScene::_ParseSection_SPRITES(string line)
+void PlayScene::_ParseSection_SPRITES(string line)
 {
 	vector<string> tokens = split(line);
 
@@ -47,17 +49,17 @@ void CPlayScene::_ParseSection_SPRITES(string line)
 	int b = atoi(tokens[4].c_str());
 	int texID = atoi(tokens[5].c_str());
 
-	LPTEXTURE tex = CTextures::GetInstance()->Get(texID);
+	LPTEXTURE tex = Textures::GetInstance()->Get(texID);
 	if (tex == NULL)
 	{
 		DebugOut(L"[ERROR] Texture ID %d not found!\n", texID);
 		return; 
 	}
 
-	CSprites::GetInstance()->Add(ID, l, t, r, b, tex);
+	Sprites::GetInstance()->Add(ID, l, t, r, b, tex);
 }
 
-void CPlayScene::_ParseSection_ASSETS(string line)
+void PlayScene::_ParseSection_ASSETS(string line)
 {
 	vector<string> tokens = split(line);
 
@@ -69,7 +71,7 @@ void CPlayScene::_ParseSection_ASSETS(string line)
 	LoadAssets(path.c_str());
 }
 
-void CPlayScene::_ParseSection_ANIMATIONS(string line)
+void PlayScene::_ParseSection_ANIMATIONS(string line)
 {
 	vector<string> tokens = split(line);
 
@@ -77,46 +79,80 @@ void CPlayScene::_ParseSection_ANIMATIONS(string line)
 
 	//DebugOut(L"--> %s\n",ToWSTR(line).c_str());
 
-	LPANIMATION ani = new CAnimation();
+	LPANIMATION ani = new Animation();
 
 	int ani_id = atoi(tokens[0].c_str());
 	for (int i = 1; i < tokens.size(); i += 2)	// why i+=2 ?  sprite_id | frame_time  
 	{
 		int sprite_id = atoi(tokens[i].c_str());
-		int frame_time = atoi(tokens[i+1].c_str());
+		int frame_time = atoi(tokens[i + 1].c_str());
 		ani->Add(sprite_id, frame_time);
 	}
 
-	CAnimations::GetInstance()->Add(ani_id, ani);
+	Animations::GetInstance()->Add(ani_id, ani);
 }
 
-void CPlayScene::_ParseSection_MAP(string line)
+void PlayScene::_ParseSection_ANIMATION_SETS(string line)
 {
 	vector<string> tokens = split(line);
 
-	if (tokens.size() < 1) return;
-	wstring path = ToWSTR(tokens[0]);
+	if (tokens.size() < 2) return; // skip invalid lines - an animation set must at least id and one animation id
 
-	map = new Map(ID_TEX_MAP, 11, 11, 178, 45, 117);
+	int ani_set_id = atoi(tokens[0].c_str());
+
+	LPANIMATION_SET s = new AnimationSet();
+
+	Animations* animations = Animations::GetInstance();
+
+	for (int i = 1; i < tokens.size(); i++)
+	{
+		int ani_id = atoi(tokens[i].c_str());
+
+		LPANIMATION ani = animations->Get(ani_id);
+		s->push_back(ani);
+	}
+
+	AnimationSets::GetInstance()->Add(ani_set_id, s);
+}
+
+void PlayScene::_ParseSection_MAPS(string line)
+{
+	vector<string> tokens = split(line);
+
+	if (tokens.size() < 7) return; // skip invalid lines
+
+	int idMap = atoi(tokens[0].c_str());
+	int tolRowTileSet = atoi(tokens[1].c_str());
+	int tolColTileSet = atoi(tokens[2].c_str());
+	int tolRowMap = atoi(tokens[3].c_str());
+	int tolColMap = atoi(tokens[4].c_str());
+	int totalTiles = atoi(tokens[5].c_str());
+	wstring MatrixPath = ToWSTR(tokens[6]);
+
+	this->map = new Map(idMap, tolRowTileSet, tolColTileSet, tolRowMap, tolColMap, totalTiles);
+	map->LoadMatrix(MatrixPath.c_str());
 	map->CreateTilesFromTileSet();
-	map->LoadMatrix(path.c_str());
 }
 
 /*
 	Parse a line in section [OBJECTS] 
 */
-void CPlayScene::_ParseSection_OBJECTS(string line)
+void PlayScene::_ParseSection_OBJECTS(string line)
 {
 	vector<string> tokens = split(line);
 
 	// skip invalid lines - an object set must have at least id, x, y
-	if (tokens.size() < 2) return;
+	if (tokens.size() < 3) return;
 
 	int object_type = atoi(tokens[0].c_str());
 	float x = (float)atof(tokens[1].c_str());
 	float y = (float)atof(tokens[2].c_str());
 
-	CGameObject *obj = NULL;
+	int ani_set_id = atoi(tokens[3].c_str());
+
+	AnimationSets* animation_sets = AnimationSets::GetInstance();
+
+	GameObject *obj = NULL;
 
 	switch (object_type)
 	{
@@ -126,15 +162,18 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			DebugOut(L"[ERROR] MARIO object was created before!\n");
 			return;
 		}
-		obj = new CMario(x,y); 
-		player = (CMario*)obj;  
+		obj = new Mario(x,y); 
+		player = (Mario*)obj;  
 
 		DebugOut(L"[INFO] Player object has been created!\n");
 		break;
-	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(x, y); break;
-	case OBJECT_TYPE_KOOPATROOPA: obj = new CKoopaTroopa(x,y); break;
-	case OBJECT_TYPE_BRICK: obj = new CBrick(x,y); break;
-	case OBJECT_TYPE_COIN: obj = new CCoin(x, y); break;
+	case OBJECT_TYPE_GOOMBA: obj = new Goomba(); break;
+	case OBJECT_TYPE_BRICK: obj = new Brick(); break;
+	case OBJECT_TYPE_KOOPAS: obj = new KoopaTroopa(); break;
+	case OBJECT_TYPE_BLOCKS: obj = new Block(); break;
+	case OBJECT_TYPE_GROUNDS: obj = new Ground(); break;
+	case OBJECT_TYPE_PIPES:	obj = new Pipe(); break;
+	/*case OBJECT_TYPE_COIN: obj = new CCoin(x, y); break;
 
 	case OBJECT_TYPE_PLATFORM:
 	{
@@ -175,16 +214,16 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		);
 
 		break;
-	}
+	}*/
 
-	case OBJECT_TYPE_PORTAL:
+	/*case OBJECT_TYPE_PORTAL:
 	{
 		float r = (float)atof(tokens[3].c_str());
 		float b = (float)atof(tokens[4].c_str());
 		int scene_id = atoi(tokens[5].c_str());
 		obj = new CPortal(x, y, r, b, scene_id);
 	}
-	break;
+	break;*/
 
 
 	default:
@@ -195,11 +234,13 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	// General object setup
 	obj->SetPosition(x, y);
 
+	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 
+	obj->SetAnimationSet(ani_set);
 	objects.push_back(obj);
 }
 
-void CPlayScene::LoadAssets(LPCWSTR assetFile)
+void PlayScene::LoadAssets(LPCWSTR assetFile)
 {
 	DebugOut(L"[INFO] Start loading assets from : %s \n", assetFile);
 
@@ -217,6 +258,7 @@ void CPlayScene::LoadAssets(LPCWSTR assetFile)
 
 		if (line == "[SPRITES]") { section = ASSETS_SECTION_SPRITES; continue; };
 		if (line == "[ANIMATIONS]") { section = ASSETS_SECTION_ANIMATIONS; continue; };
+		if (line == "[ANIMATION_SETS]") { section = ASSETS_SECTION_ANIMATION_SETS; continue; };
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }
 
 		//
@@ -226,6 +268,7 @@ void CPlayScene::LoadAssets(LPCWSTR assetFile)
 		{
 		case ASSETS_SECTION_SPRITES: _ParseSection_SPRITES(line); break;
 		case ASSETS_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
+		case ASSETS_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 		}
 	}
 
@@ -234,7 +277,7 @@ void CPlayScene::LoadAssets(LPCWSTR assetFile)
 	DebugOut(L"[INFO] Done loading assets from %s\n", assetFile);
 }
 
-void CPlayScene::Load()
+void PlayScene::Load()
 {
 	DebugOut(L"[INFO] Start loading scene from : %s \n", sceneFilePath);
 
@@ -260,7 +303,7 @@ void CPlayScene::Load()
 		//
 		switch (section)
 		{ 
-			case SCENE_SECTION_MAP: _ParseSection_MAP(line); break;
+			case SCENE_SECTION_MAP: _ParseSection_MAPS(line); break;
 			case SCENE_SECTION_ASSETS: _ParseSection_ASSETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
 		}
@@ -268,10 +311,12 @@ void CPlayScene::Load()
 
 	f.close();
 
+	Textures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
+
 	DebugOut(L"[INFO] Done loading scene  %s\n", sceneFilePath);
 }
 
-void CPlayScene::Update(DWORD dt)
+void PlayScene::Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
@@ -294,28 +339,56 @@ void CPlayScene::Update(DWORD dt)
 	float cx, cy;
 	player->GetPosition(cx, cy);
 
-	CGame *game = CGame::GetInstance();
-	cx -= game->GetBackBufferWidth() / 2;
-	cy -= game->GetBackBufferHeight() / 2;
+	Game *game = Game::GetInstance();
+	int screenWidth = game->GetScreenWidth();
+	int screenHeight = game->GetScreenHeight();
+	int mapWidth = map->GetMapWidth();
+	int mapHeight = map->GetMapHeiht();
+	int oldCamY = game->GetCamY();
 
-	if (cx < 0) cx = 0;
+	/*cx -= game->GetScreenWidth() / 2;
+	cy -= game->GetScreenHeight() / 2;*/
 
-	CGame::GetInstance()->SetCamPos(cx, /*0.0f*/ cy);
+	if (cx - (screenWidth / 2) <= 16)
+	{
+		cx = 16;
+	}
+	else if (cx + (screenWidth / 2) > (mapWidth - 16))
+	{
+		cx = (mapWidth - 16) - screenWidth;
+	}
+	else
+	{
+		cx -= (screenWidth / 2);
+	}
 
-	PurgeDeletedObjects();
+	if (cy - (screenHeight / 2) < 16)
+		cy = 16;
+	else if (cy + (screenHeight / 2) >= 448)
+		cy = 448 - screenHeight;
+	else/* if (cy < oldCamY + screenHeight / 2)*/
+	{
+		cy -= screenHeight / 2;
+		/*	DebugOut(L"Error");*/
+	}
+
+	Game::GetInstance()->SetCamPos(round(cx), round(cy));
+
+	//PurgeDeletedObjects();
 }
 
-void CPlayScene::Render()
+void PlayScene::Render()
 {
 	map->Render();
 	for (int i = 0; i < objects.size(); i++)
 		objects[i]->Render();
+	//objects[0]->Render();
 }
 
 /*
 *	Clear all objects from this scene
 */
-void CPlayScene::Clear()
+void PlayScene::Clear()
 {
 	vector<LPGAMEOBJECT>::iterator it;
 	for (it = objects.begin(); it != objects.end(); it++)
@@ -331,7 +404,7 @@ void CPlayScene::Clear()
 	TODO: Beside objects, we need to clean up sprites, animations and textures as well 
 
 */
-void CPlayScene::Unload()
+void PlayScene::Unload()
 {
 	for (int i = 0; i < objects.size(); i++)
 		delete objects[i];
@@ -342,9 +415,9 @@ void CPlayScene::Unload()
 	DebugOut(L"[INFO] Scene %d unloaded! \n", id);
 }
 
-bool CPlayScene::IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o == NULL; }
+bool PlayScene::IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o == NULL; }
 
-void CPlayScene::PurgeDeletedObjects()
+void PlayScene::PurgeDeletedObjects()
 {
 	vector<LPGAMEOBJECT>::iterator it;
 	for (it = objects.begin(); it != objects.end(); it++)
@@ -360,6 +433,6 @@ void CPlayScene::PurgeDeletedObjects()
 	// NOTE: remove_if will swap all deleted items to the end of the vector
 	// then simply trim the vector, this is much more efficient than deleting individual items
 	objects.erase(
-		std::remove_if(objects.begin(), objects.end(), CPlayScene::IsGameObjectDeleted),
+		std::remove_if(objects.begin(), objects.end(), PlayScene::IsGameObjectDeleted),
 		objects.end());
 }

@@ -11,11 +11,11 @@ height	240
 2	scene02.txt
 5	scene0005.txt
 
-# id	file 
+# id	file	r	g	b
 [TEXTURES]
--100	textures\bbox.png
-0	textures\mario.png
-10	textures\enemies.png
-20	textures\misc.png
-15	textures\NES - Super Mario Bros 3 - Enemies.png
-30	Map\map1-1_bank.png
+0	textures\Mario1.png	68	145	190
+20	textures\misc.png	176	224	248
+10	textures\enemies.png	3	26	110
+30	textures\map1-1_bank.png	255	255	255
+40	textures\Tiles.png	255	127	93
+50	textures\Tiles.png	127	255	142

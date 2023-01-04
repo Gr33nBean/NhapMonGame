@@ -1,30 +1,36 @@
 #include <d3dx9.h>
 #include <algorithm>
 
-
+#include "Utils.h"
 #include "debug.h"
 #include "Textures.h"
 #include "Game.h"
 #include "GameObject.h"
 #include "Sprites.h"
 
-CGameObject::CGameObject()
+GameObject::GameObject()
 {
 	x = y = 0;
 	vx = vy = 0;
-	nx = 1;	
-	ny = 0;
-	state = -1;
-	isDeleted = false;
+	nx = 1;
+	ny = -1;
 	isEnable = true;
+	isDeleted = false;
 }
 
-void CGameObject::RenderBoundingBox()
+void GameObject::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
+{
+	this->dt = dt;
+	dx = vx * dt;
+	dy = vy * dt;
+}
+
+void GameObject::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);
 	RECT rect;
 
-	LPTEXTURE bbox = CTextures::GetInstance()->Get(ID_TEX_BBOX);
+	LPTEXTURE bbox = Textures::GetInstance()->Get(ID_TEX_BBOX);
 
 	float l,t,r,b; 
 
@@ -34,13 +40,10 @@ void CGameObject::RenderBoundingBox()
 	rect.right = (int)r - (int)l;
 	rect.bottom = (int)b - (int)t;
 
-	float cx, cy; 
-	CGame::GetInstance()->GetCamPos(cx, cy);
-
-	CGame::GetInstance()->Draw(x - cx, y - cy, bbox, &rect, BBOX_ALPHA);
+	Game::GetInstance()->Draw(x, y, bbox, rect.left, rect.top, rect.right, rect.bottom, 0);
 }
 
-CGameObject::~CGameObject()
+GameObject::~GameObject()
 {
 
 }
