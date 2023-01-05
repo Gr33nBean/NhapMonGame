@@ -38,6 +38,8 @@
 40047	1157	1	1173	17	40
 40048	1174	1	1190	17	40
 40049	1191	1	1207	17	40
+#Invisible Brick
+40000	350	200	366	216	10	
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
@@ -74,6 +76,8 @@
 842	40042	100	40043	100	40044	100	40045	100
 #? Brick
 843	40046	100	40047	100	40048	100	40049	100
+#Invisible brick
+899	40000	100
 
 # id	ani1	ani2	ani3
 [ANIMATION_SETS]
@@ -109,3 +113,5 @@
 42	842
 #? Brick
 43	843
+#invisible brick
+99	899

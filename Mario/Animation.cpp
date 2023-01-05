@@ -16,7 +16,7 @@ void Animation::Add(int spriteId, DWORD time)
 
 void Animation::Render(int nx, float x, float y, int alpha)
 {
-	ULONGLONG now = GetTickCount64();
+	DWORD now = GetTickCount64();
 	if (currentFrame == -1)
 	{
 		currentFrame = 0;

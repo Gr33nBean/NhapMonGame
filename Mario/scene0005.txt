@@ -10,18 +10,16 @@ tiles.txt
 #
 [OBJECTS]
 # type	x	y	extra_settings per object type
-# type:  0 = Mario , 1 = Brick, 2 = Goomba,3=KoopaTroopa,4= Ground,6 = Pipe,5 = block
+# type: 0 = Mario , 1 = Brick, 2 = Goomba,3=KoopaTroopa,4= Ground,6 = Pipe,5 = block, 7 = Invisible Brick
 
 # MARIO
-0	30.0	300	1
+0	650	380	1
 #Goombaa
 #2	200	416	3
 #2	530	416	3
 #2	850	400	3
 #2	896	440	3
 #2	1000	440	3
-#Green Koopa
-3	200	405	4
 #Ground
 4	16.0	432	15
 4	32	432	16
@@ -347,3 +345,15 @@ tiles.txt
 1	2112	400	42
 1	2112	416	42
 1	2128	416	42
+#Invisible Brick
+7	630	416	99	0
+7	388	416	99	0
+7	518	390	99	1
+7	620	386	99	1
+7	2090	384	99	1
+7	2136	384	99	1
+7	2240	416	99	0
+7	1904	416	99	0
+#Green Koopa
+3	580.0	350	4	0
+3	2112	370	4	0

@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "Goomba.h"
 #include "Brick.h"
+#include "Block.h"
 #include "Ground.h"
 #include "Pipe.h"
 #include "Utils.h"
@@ -12,13 +13,6 @@ KoopaTroopa::KoopaTroopa() :Enemy()
 	isEnable = true;
 }
 
-KoopaTroopa::KoopaTroopa(float x, float y) :Enemy(x, y)
-{
-	isPickedUp = false;
-	isEnable = true;
-	isBumped = false;
-	SetState(KOOPATROOPA_STATE_WALKING);
-}
 
 void KoopaTroopa::GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable)
 {
@@ -91,6 +85,7 @@ void KoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
+			//Xử lí khi Koopa trong trạng thái bị đá và cầm
 			if (isBumped == true || isPickedUp == true)
 			{
 				//Bug: Khi Mario cầm shell
@@ -140,7 +135,7 @@ void KoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 
 			}
-			if (dynamic_cast<Ground*>(e->obj))
+			if (dynamic_cast<Ground*>(e->obj) || dynamic_cast<Brick*>(e->obj))
 			{
 				if (e->ny != 0)
 				{
@@ -154,6 +149,55 @@ void KoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 
 			}
+			// sử dụng các đối tượng vô hình để chặn hướng đi của RedKoopa
+			if (dynamic_cast<InvisibleBrick*>(e->obj))
+			{
+				if (state != KOOPATROOPA_STATE_HIDING && state != KOOPATROOPA_STATE_IS_BUMPED)
+				{
+					if (e->nx != 0)
+					{
+						this->nx = -this->nx;
+						vx = -vx;
+						this->x = x0 + e->t * dx + e->nx * 0.4f;
+					}
+					if (e->ny != 0)
+					{
+						vy = 0;
+						this->y = y0 + min_ty * dx + e->ny * 0.4f;
+					}
+				}
+				else if (state == KOOPATROOPA_STATE_IS_BUMPED)
+				{
+					if (dynamic_cast<InvisibleBrick*>(e->obj)->GetType() == INVISIBLEBRICK_TYPE_GROUND)
+					{
+						if (e->nx != 0)
+						{
+							this->nx = -this->nx;
+							vx = -vx;
+							this->x = x0 + e->t * dx + e->nx * 0.4f;
+						}
+						if (e->ny != 0)
+						{
+							vy = 0;
+							this->y = y0 + min_ty * dx + e->ny * 0.4f;
+						}
+					}
+				}
+
+			}
+			if (dynamic_cast<Block*>(e->obj))
+			{
+				if (e->ny < 0)
+				{
+					this->y = y0 + min_ty * dy + e->ny * 0.4f;
+					vy = 0;
+				}
+				else
+				{
+					x = x0 + dx;
+					y = y0 + dy;
+				}
+			}
 		}
 	}
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
@@ -162,11 +206,17 @@ void KoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void KoopaTroopa::Render()
 {
-	int ani;
+	int ani = 0;
 	if (state == KOOPATROOPA_STATE_WALKING)
 		ani = KOOPATROOPA_ANI_WALKING;
 	else
 		ani = KOOPATROOPA_ANI_HIDING;
+	if (state == KOOPATROOPA_STATE_DIE_NX)
+		ani = KOOPATROOPA_ANI_DEATH;
+	if (isBumped == true)
+		ani = KOOPATROOPA_ANI_BUMPING;
+	if (type == KOOPATROOPA_TYPE_RED)
+		ani += 4;
 	animation_set->at(ani)->Render(nx, x, y);
 }
 

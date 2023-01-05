@@ -46,10 +46,10 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		x += dx;
 		y += dy;
 		/*isInGround = false;*/
-		if (vy > 0.1)
+	/*	if (vy > 0.15)
 		{
 			isInGround = false;
-		}
+		}*/
 	}
 	else
 	{
@@ -110,6 +110,10 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 							}
 						}
 					}
+
+
+
+
 				}
 			}
 			if (dynamic_cast<Block*>(e->obj))
@@ -117,7 +121,7 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (e->ny < 0)
 				{
 					HandleCollision(min_tx, min_ty, e->nx, e->ny, x0, y0);
-					ny = 1;
+					vy = 0;
 				}
 				else
 				{
@@ -125,7 +129,7 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					y = y0 + dy;
 				}
 			}
-			else
+			else if (!dynamic_cast<InvisibleBrick*>(e->obj))
 			{
 				HandleCollision(min_tx, min_ty, e->nx, e->ny, x0, y0);
 			}
@@ -176,6 +180,7 @@ void Mario::Render()
 				ani += 12;
 			if (power_melter_stack == POWER_METER_FULL)
 				ani += 16;
+			DebugOut(L"\nA");
 			/*}
 			else
 			{
@@ -191,18 +196,25 @@ void Mario::Render()
 			ani += 20;
 		else
 			ani += 8;
+		DebugOut(L"\nB");
 	}
 	if (state == MARIO_STATE_KICK)
 	{
 		ani += 28;
+		DebugOut(L"\nC");
 	}
+	if (state == MARIO_STATE_DODGE)
+	{
+		ani += 39;
+		DebugOut(L"\nD");
+	}
+
 	if (state == MARIO_STATE_DEATH)
 		ani = MARIO_ANI_DIE;
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 	animation_set->at(ani)->Render(nx, x, y, alpha);
-	DebugOut(L"Mario ani: %d\n", ani);
-	//RenderBoundingBox();
+	RenderBoundingBox();
 
 }
 
@@ -224,6 +236,7 @@ void Mario::SetState(int state)
 	case MARIO_STATE_IDLE:
 		vx = 0;
 		isKickShell = false;
+		isInGround = true;
 		break;
 	case MARIO_STATE_DEATH:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
@@ -429,4 +442,23 @@ int Mario::GetHeight()
 		return MARIO_SMALL_BBOX_HEIGHT;
 	else
 		return 32;
+}
+void Mario::Dodge()
+{
+	isInGround = true;
+	if (form != MARIO_SMALL_FORM && isDodging == false)
+	{
+		y += (this->GetHeight() - MARIO_BBOX_DODGING) - 10;
+		this->SetState(MARIO_STATE_DODGE);
+		isDodging = true;
+	}
+}
+void Mario::Undodge()
+{
+	if (this->state == MARIO_STATE_DODGE)
+	{
+		y -= (this->GetHeight() - MARIO_BBOX_DODGING);
+		isDodging = false;
+	}
+
 }

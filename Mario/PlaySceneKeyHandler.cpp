@@ -41,6 +41,9 @@ void PlaySceneKeyHandler::OnKeyUp(int KeyCode)
 		mario->isPickingUp = false;
 		mario->isPressedJ = false;
 		break;
+	case DIK_S:
+		mario->Undodge();
+		break;
 	}
 }
 
@@ -86,6 +89,10 @@ void PlaySceneKeyHandler::KeyState(BYTE *states)
 	//{
 	//	/*mario->Jump();*/
 	//}
+	else if (game->IsKeyDown(DIK_S))
+	{
+		mario->Dodge();
+	}
 	else
 	{
 		mario->LosePowerMelter();

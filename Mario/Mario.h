@@ -23,6 +23,7 @@
 
 #define MARIO_RACCOON_BBOX_WIDTH 24
 #define MARIO_RACCOON_BBOX_HEIGHT 32
+#define MARIO_BBOX_DODGING		18
 
 #define MARIO_UNTOUCHABLE_TIME 1000
 
@@ -57,6 +58,7 @@
 #define MARIO_STATE_PICK			700
 #define MARIO_STATE_DEATH			800
 #define MARIO_STATE_STOP			900
+#define MARIO_STATE_DODGE			1000
 
 #define MARIO_STATE_RELEASE_JUMP    301
 
@@ -115,7 +117,11 @@
 #define MARIO_ANI_FIRE_HOLD_SHELL_IDLE	38
 #define MARIO_ANI_RACCOON_HOLD_SHELL_IDLE	39
 
-#define MARIO_ANI_DIE				40
+#define MARIO_ANI_BIG_DODGE	40
+#define MARIO_ANI_FIRE_DODGE	41
+#define MARIO_ANI_RACCOON_DODGE	42
+
+#define MARIO_ANI_DIE				43
 
 
 
@@ -132,8 +138,7 @@ class Mario : public GameObject
 	DWORD long_jump_start; // tính khi nhấn giữ nút tính stack
 	bool isInGround;
 	bool isKickShell;
-
-	BOOLEAN isSitting;
+	bool isDodging;
 	
 	int coin; 
 
@@ -160,7 +165,7 @@ public:
 		power_melter_stack = 0;
 		form = MARIO_BIG_FORM;
 
-		isSitting = false;
+	
 	}
 	Mario(float x, float y)
 	{
@@ -173,8 +178,9 @@ public:
 		isEnable = true;
 		isKickShell = false;
 		isPressedJ = false;
+		isInGround = true;
 
-		isSitting = false;		
+	
 	}
 
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
@@ -205,4 +211,6 @@ public:
 	void HandleCollision(float min_tx, float min_ty, float nx, float ny, float x0, float y0);
 	int GetWidth();
 	int GetHeight();
+	void Dodge();
+	void Undodge();
 };

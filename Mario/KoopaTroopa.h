@@ -3,6 +3,10 @@
 #include "Enemy.h"
 #include "Mario.h"
 
+#define KOOPATROOPA_TYPE_RED	0
+#define KOOPATROOPA_TYPE_GREEN	1
+
+
 #define KOOPATROOPA_WALKING_SPEED 0.05f
 #define KOOPATROOPA_GRAVITY 0.002f
 #define KOOPATROOPA_BUMP_SPEED	0.3f
@@ -25,6 +29,7 @@
 class KoopaTroopa :public Enemy
 {
 	Mario* mario;
+	int type;
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
@@ -43,7 +48,14 @@ public:
 	void IsKicked(int nx);
 
 	KoopaTroopa();
-	KoopaTroopa(float x, float y);
+	KoopaTroopa(int x, int y, int _type = 0) : Enemy(x, y)
+	{
+		isPickedUp = false;
+		isEnable = true;
+		isBumped = false;
+		type = _type;
+		this->SetState(KOOPATROOPA_STATE_WALKING);
+	}
 	virtual void SetState(int state);
 	virtual bool IsDead();
 	virtual void SetDie(bool n);

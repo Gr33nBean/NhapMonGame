@@ -168,7 +168,6 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="PlayScene.h" />
     <ClInclude Include="Portal.h" />
     <ClInclude Include="PlaySceneKeyHandler.h" />
-    <ClInclude Include="RedKoopa.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Sprites.h" />
@@ -198,7 +197,6 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="PlayScene.cpp" />
     <ClCompile Include="Portal.cpp" />
     <ClCompile Include="PlaySceneKeyHandler.cpp" />
-    <ClCompile Include="RedKoopa.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Sprites.cpp" />

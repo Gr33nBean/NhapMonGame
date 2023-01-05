@@ -169,63 +169,21 @@ void PlayScene::_ParseSection_OBJECTS(string line)
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new Goomba(x,y); break;
 	case OBJECT_TYPE_BRICK: obj = new Brick(); break;
-	case OBJECT_TYPE_KOOPAS: obj = new KoopaTroopa(x,y); break;
+	case OBJECT_TYPE_KOOPAS:
+	{
+		int set_type = atoi(tokens[4].c_str());
+		obj = new KoopaTroopa(x, y, set_type);
+		break;
+	}
 	case OBJECT_TYPE_BLOCKS: obj = new Block(); break;
 	case OBJECT_TYPE_GROUNDS: obj = new Ground(); break;
 	case OBJECT_TYPE_PIPES:	obj = new Pipe(); break;
-	/*case OBJECT_TYPE_COIN: obj = new CCoin(x, y); break;
-
-	case OBJECT_TYPE_PLATFORM:
+	case OBJECT_TYPE_INVISIBLEBRICK:
 	{
-
-		float cell_width = (float)atof(tokens[3].c_str());
-		float cell_height = (float)atof(tokens[4].c_str());
-		int length = atoi(tokens[5].c_str());
-		int sprite_begin = atoi(tokens[6].c_str());
-		int sprite_middle = atoi(tokens[7].c_str());
-		int sprite_end = atoi(tokens[8].c_str());
-
-		obj = new CPlatform(
-			x, y,
-			cell_width, cell_height, length,
-			sprite_begin, sprite_middle, sprite_end
-		);
-
+		int set_type = atoi(tokens[4].c_str());
+		obj = new InvisibleBrick(set_type);
 		break;
 	}
-
-	case OBJECT_TYPE_MOVING_PLATFORM:
-	{
-
-		float cell_width = (float)atof(tokens[3].c_str());
-		float cell_height = (float)atof(tokens[4].c_str());
-		int length = atoi(tokens[5].c_str());
-		int sprite_begin = atoi(tokens[6].c_str());
-		int sprite_middle = atoi(tokens[7].c_str());
-		int sprite_end = atoi(tokens[8].c_str());
-
-		float top = (float)atof(tokens[9].c_str());
-		float bottom = (float)atof(tokens[10].c_str());
-
-		obj = new CMovingPlatform(
-			x, y,
-			cell_width, cell_height, length,
-			sprite_begin, sprite_middle, sprite_end, top, bottom
-		);
-
-		break;
-	}*/
-
-	/*case OBJECT_TYPE_PORTAL:
-	{
-		float r = (float)atof(tokens[3].c_str());
-		float b = (float)atof(tokens[4].c_str());
-		int scene_id = atoi(tokens[5].c_str());
-		obj = new CPortal(x, y, r, b, scene_id);
-	}
-	break;*/
-
-
 	default:
 		DebugOut(L"[ERROR] Invalid object type: %d\n", object_type);
 		return;
@@ -366,10 +324,9 @@ void PlayScene::Update(DWORD dt)
 		cy = 16;
 	else if (cy + (screenHeight / 2) >= 448)
 		cy = 448 - screenHeight;
-	else/* if (cy < oldCamY + screenHeight / 2)*/
+	else
 	{
 		cy -= screenHeight / 2;
-		/*	DebugOut(L"Error");*/
 	}
 
 	Game::GetInstance()->SetCamPos(round(cx), round(cy));
