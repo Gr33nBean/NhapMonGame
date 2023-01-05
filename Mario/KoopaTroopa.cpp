@@ -2,6 +2,8 @@
 #include "debug.h"
 #include "Goomba.h"
 #include "Brick.h"
+#include "Ground.h"
+#include "Pipe.h"
 #include "Utils.h"
 
 KoopaTroopa::KoopaTroopa() :Enemy()
@@ -14,6 +16,7 @@ KoopaTroopa::KoopaTroopa(float x, float y) :Enemy(x, y)
 {
 	isPickedUp = false;
 	isEnable = true;
+	isBumped = false;
 	SetState(KOOPATROOPA_STATE_WALKING);
 }
 
@@ -25,10 +28,11 @@ void KoopaTroopa::GetBoundingBox(float& left, float& top, float& right, float& b
 		top = y;
 		right = x + KOOPATROOPA_BBOX_WIDTH;
 
-		if (state == KOOPATROOPA_STATE_HIDING)
+		if (state == KOOPATROOPA_STATE_HIDING || state == KOOPATROOPA_STATE_IS_BUMPED)
 			bottom = y + KOOPATROOPA_BBOX_HEIGHT_HIDING;
 		else
 			bottom = y + KOOPATROOPA_BBOX_HEIGHT;
+
 	}
 	else
 	{
@@ -37,32 +41,123 @@ void KoopaTroopa::GetBoundingBox(float& left, float& top, float& right, float& b
 		right = 0;
 		bottom = 0;
 	}
-	
 }
 
 void KoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	Enemy::Update(dt, coObjects);
+
 	vy += KOOPATROOPA_GRAVITY * dt;
 
-	//Nếu đang rinh cái mai
+	//Xét nếu đang bị cầm ở dạng shell
 	if (isPickedUp == true)
 	{
-		if (mario->isPickingUp == true)
+		if (mario->isPickingUp)
 		{
-			this->vx = mario->vx;
-			this->vy = mario->vy;
-			this->nx = mario->nx;
-			this->ny = mario->ny;
+			if (mario->nx > 0)
+			{
+				this->x = mario->x + mario->GetWidth() + 1;
+			}
+			else
+				this->x = mario->x - KOOPATROOPA_BBOX_WIDTH;
+			this->y = mario->y + mario->GetHeight() / 2 - 5;
 		}
-		else // thả cái mai ra
+		else // nếu người chơi nhả nút giữ sẽ trở về Hiding
 		{
 			isPickedUp = false;
 			this->SetState(KOOPATROOPA_STATE_HIDING);
 		}
 
 	}
-	CCollision::GetInstance()->Process(this, dt, coObjects);
+	vector<LPCOLLISIONEVENT> coEvents;
+	vector<LPCOLLISIONEVENT> coEventsResult;
+
+	coEvents.clear();
+	if (state != KOOPATROOPA_STATE_DIE_NX)
+		CalcPotentialCollisions(coObjects, coEvents);
+	if (coEvents.size() == 0)
+	{
+		x += dx;
+		y += dy;
+	}
+	else
+	{
+		float min_tx, min_ty, nx = 0, ny;
+		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
+		float x0 = x, y0 = y;
+		x = x0 + dx;
+		y = y0 + dy;
+
+		for (UINT i = 0; i < coEventsResult.size(); i++)
+		{
+			LPCOLLISIONEVENT e = coEventsResult[i];
+			if (isBumped == true || isPickedUp == true)
+			{
+				//Bug: Khi Mario cầm shell
+				if (dynamic_cast<Mario*>(e->obj))
+				{
+					if (isPickedUp == true)
+					{
+						if (e->ny != 0)
+						{
+							vy = 0;
+							y = y0 + min_ty * dy + ny * 0.4f;
+						}
+						if (e->nx != 0 && isPickedUp == false)
+						{
+							x = x0 + min_tx * dx + nx * 0.4f;
+						}
+					}
+				}
+				if (dynamic_cast<Enemy*>(e->obj))
+				{
+					Enemy* enemy = dynamic_cast<Enemy*>(e->obj);
+					if (e->nx != 0)
+					{
+						if (isPickedUp == true)
+						{
+							this->SetState(KOOPATROOPA_STATE_DIE_NX);
+						}
+						enemy->SetDie(true);
+					}
+				}
+				if (isBumped == true)
+				{
+					if (dynamic_cast<Pipe*>(e->obj) || dynamic_cast<Brick*>(e->obj))
+					{
+						if (e->nx != 0)
+						{
+							this->vx = -this->vx;
+							this->nx = -this->nx;
+							x = x0 + min_tx * dx + nx * 0.4f;
+						}
+						if (e->ny != 0)
+						{
+							vy = 0;
+							y = y0 + min_ty * dy + ny * 0.4f;
+						}
+					}
+				}
+
+			}
+			if (dynamic_cast<Ground*>(e->obj))
+			{
+				if (e->ny != 0)
+				{
+					vy = 0;
+					y = y0 + min_ty * dy + ny * 0.4f;
+				}
+				if (e->nx != 0 && isPickedUp == false)
+				{
+					x = x0 + min_tx * dx + nx * 0.4f;
+				}
+
+
+			}
+		}
+	}
+	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+	//Enemy::Update(dt, coObjects);
 }
 
 void KoopaTroopa::Render()
@@ -77,29 +172,37 @@ void KoopaTroopa::Render()
 
 void KoopaTroopa::SetState(int state)
 {
-	GameObject::SetState(state);
+	Enemy::SetState(state);
 	switch (state)
 	{
-		case KOOPATROOPA_STATE_WALKING:
-			vx = -KOOPATROOPA_WALKING_SPEED;
-			nx = -1;
-			break;
-		case KOOPATROOPA_STATE_HIDING:
-			y += (KOOPATROOPA_BBOX_HEIGHT - KOOPATROOPA_BBOX_HEIGHT_HIDING)/2;
-			vx = 0;
-			vy = 0;
-			break;
-		case KOOPATROOPA_STATE_DIE_NX:
-			vy = -KOOPATROOPA_DIE_DEFLECT_SPEED;
-			isEnable = false;
-			vx = 0;
-			break;
+	case KOOPATROOPA_STATE_WALKING:
+		vx = -KOOPATROOPA_WALKING_SPEED;
+		isBumped = false;
+		isPickedUp = false;
+		nx = -1;
+		break;
+	case KOOPATROOPA_STATE_HIDING:
+		isBumped = false;
+		isPickedUp = false;
+		vy = 0;
+		vx = 0;
+		break;
+	case KOOPATROOPA_STATE_DIE_NX:
+		vy = -KOOPATROOPA_DIE_DEFLECT_SPEED;
+		isEnable = false;
+		isBumped = false;
+		isPickedUp = false;
+		vx = 0;
+		break;
+	case KOOPATROOPA_STATE_IS_BUMPED:
+		isBumped = true;
+		break;
 	}
 }
 
 void KoopaTroopa::SetDie(bool n)
 {
-	// true: nx. false = ny
+	// true: n. false = ny
 	if (n == true)
 		this->SetState(KOOPATROOPA_STATE_DIE_NX);
 	else
@@ -115,49 +218,12 @@ bool KoopaTroopa::IsDead()
 	return false;
 }
 
-void KoopaTroopa::OnNoCollision(DWORD dt)
+void KoopaTroopa::IsKicked(int n)
 {
-	x += dx;
-	y += dy;
-};
-
-void KoopaTroopa::OnCollisionWith(LPCOLLISIONEVENT e)
-{
-	//if (!e->obj->IsBlocking()) return;
-	//if (dynamic_cast<CKoopaTroopa*>(e->obj)) return;
-
-	if (e->ny != 0)
-	{
-		vy = 0;
-	}
-	else if (this->IsHiding() && dynamic_cast<Enemy*>(e->obj))
-	{
-		Enemy* enemy = dynamic_cast<Enemy*>(e->obj);
-		if (e->nx != 0)
-		{
-			if (isPickedUp == true)
-			{
-				this->SetState(KOOPATROOPA_STATE_DIE_NX);
-			}
-			enemy->SetDie(true);
-		}
-	}
-	else if (e->nx != 0)
-	{
-		// Code cái mà con rùa xanh thông minh!
-		vx = -vx;
-	}
-}
-
-void KoopaTroopa::IsKicked(int nx)
-{
-	this->nx = nx;
-	if (this->nx < 0)
-	{
-		this->vx = -KOOPATROOPA_BUMP_SPEED;
-	}
-	else
-		this->vx = KOOPATROOPA_BUMP_SPEED;
+	this->nx = n;
+	this->SetState(KOOPATROOPA_STATE_IS_BUMPED);
+	vx = nx * KOOPATROOPA_BUMP_SPEED;
+	isBumped = true;
 }
 
 bool KoopaTroopa::IsHiding()

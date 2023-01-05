@@ -167,9 +167,9 @@ void PlayScene::_ParseSection_OBJECTS(string line)
 
 		DebugOut(L"[INFO] Player object has been created!\n");
 		break;
-	case OBJECT_TYPE_GOOMBA: obj = new Goomba(); break;
+	case OBJECT_TYPE_GOOMBA: obj = new Goomba(x,y); break;
 	case OBJECT_TYPE_BRICK: obj = new Brick(); break;
-	case OBJECT_TYPE_KOOPAS: obj = new KoopaTroopa(); break;
+	case OBJECT_TYPE_KOOPAS: obj = new KoopaTroopa(x,y); break;
 	case OBJECT_TYPE_BLOCKS: obj = new Block(); break;
 	case OBJECT_TYPE_GROUNDS: obj = new Ground(); break;
 	case OBJECT_TYPE_PIPES:	obj = new Pipe(); break;

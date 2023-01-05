@@ -1,5 +1,6 @@
 # id	left	top	right	bottom	texture_id
 [SPRITES]
+# ===BLOCK====
 #Pink
 40001	919	137	935	153	40
 40002	936	137	952	153	40
@@ -40,6 +41,7 @@
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
+# ===BLOCK====
 #pink
 810	40001	100
 811	40002	100
@@ -75,6 +77,7 @@
 
 # id	ani1	ani2	ani3
 [ANIMATION_SETS]
+#Block
 #pink
 21	810
 22	811

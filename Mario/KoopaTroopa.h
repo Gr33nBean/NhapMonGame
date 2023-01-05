@@ -5,7 +5,7 @@
 
 #define KOOPATROOPA_WALKING_SPEED 0.05f
 #define KOOPATROOPA_GRAVITY 0.002f
-#define KOOPATROOPA_BUMP_SPEED	0.1f
+#define KOOPATROOPA_BUMP_SPEED	0.3f
 #define KOOPATROOPA_DIE_DEFLECT_SPEED 0.5f
 
 #define KOOPATROOPA_BBOX_WIDTH 16
@@ -16,9 +16,12 @@
 #define KOOPATROOPA_STATE_HIDING 200
 #define KOOPATROOPA_STATE_IS_PICKED_UP 300
 #define KOOPATROOPA_STATE_DIE_NX 400
+#define KOOPATROOPA_STATE_IS_BUMPED 500
 
 #define KOOPATROOPA_ANI_WALKING 0
 #define KOOPATROOPA_ANI_HIDING 1
+#define KOOPATROOPA_ANI_BUMPING 2
+#define KOOPATROOPA_ANI_DEATH	3
 class KoopaTroopa :public Enemy
 {
 	Mario* mario;
@@ -28,12 +31,9 @@ class KoopaTroopa :public Enemy
 
 	virtual int IsCollidable() { return 1; };
 	virtual int IsBlocking() { return 0; }
-	virtual void OnNoCollision(DWORD dt);
-
-	virtual void OnCollisionWith(LPCOLLISIONEVENT e);
 public:
 	bool isPickedUp;
-
+	bool isBumped;
 	void PickUpBy(Mario* mario) {
 		isPickedUp = true;
 		this->mario = mario;

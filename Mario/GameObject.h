@@ -66,6 +66,16 @@ public:
 	virtual void Render() = 0;
 	
 
+	LPCOLLISIONEVENT SweptAABBEx(LPGAMEOBJECT coO);
+	void CalcPotentialCollisions(vector<LPGAMEOBJECT>* coObjects, vector<LPCOLLISIONEVENT>& coEvents);
+	void FilterCollision(
+		vector<LPCOLLISIONEVENT>& coEvents,
+		vector<LPCOLLISIONEVENT>& coEventsResult,
+		float& min_tx,
+		float& min_ty,
+		float& nx,
+		float& ny);
+
 	//
 	// Collision ON or OFF ? This can change depending on object's state. For example: die
 	//

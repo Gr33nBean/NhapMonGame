@@ -91,6 +91,20 @@ public:
 	void ProcessKeyboard();
 	void SetKeyHandler(LPKEYEVENTHANDLER handler) { keyHandler = handler; }
 
+	static void SweptAABB(
+		float ml,			// move left 
+		float mt,			// move top
+		float mr,			// move right 
+		float mb,			// move bottom
+		float dx,			// 
+		float dy,			// 
+		float sl,			// static left
+		float st,
+		float sr,
+		float sb,
+		float& t,
+		float& nx,
+		float& ny);
 
 	ID3D10Device* GetDirect3DDevice() { return this->pD3DDevice; }
 	IDXGISwapChain* GetSwapChain() { return this->pSwapChain; }
@@ -109,6 +123,7 @@ public:
 	void SetCamPos(float x, float y) { cam_x = x; cam_y = y; }
 	void GetCamPos(float& x, float& y) { x = cam_x; y = cam_y; }
 	float GetCamY() { return this->cam_y; };
+	float GetCamX() { return this->cam_x; };
 
 	LPSCENE GetCurrentScene() { return scenes[current_scene]; }
 	void SwitchScene();

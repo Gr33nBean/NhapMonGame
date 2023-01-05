@@ -4,7 +4,7 @@ class Enemy :public GameObject
 {
 protected:
 	DWORD time_death;
-	int entryX, entrY;
+	float entryX, entryY;
 public:
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable) = 0;
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
@@ -17,7 +17,7 @@ public:
 	virtual void SetReborn() {};
 	virtual void SetEnable(bool enable) {};
 	virtual bool IsEnable() { return this->isEnable; };
-
+	bool IsAbleToActive();
 	Enemy();
 	Enemy(float x, float y);
 	~Enemy();

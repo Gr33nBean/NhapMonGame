@@ -9,21 +9,13 @@
 void PlaySceneKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
-	Mario* mario = (Mario *)((LPPLAYSCENE)Game::GetInstance()->GetCurrentScene())->GetPlayer(); 
 
+	Mario* mario = ((PlayScene*)scence)->GetPlayer();
 	switch (KeyCode)
 	{
-	case DIK_DOWN:
-		mario->SetState(MARIO_STATE_SIT);
-		break;
 	case DIK_K:
-		mario->SetState(MARIO_STATE_JUMPING);
-		break;
-	/*case DIK_SPACE:
-		mario->StartJumping();
-		break;*/
-	case DIK_0:
-		mario->SetState(MARIO_STATE_DEATH);
+		/*mario->SetState(MARIO_STATE_JUMPING);*/
+		mario->Jump();
 		break;
 	case DIK_U:
 		mario->UpForm();
@@ -31,12 +23,10 @@ void PlaySceneKeyHandler::OnKeyDown(int KeyCode)
 	case DIK_I:
 		mario->Information();
 		break;
-	//case DIK_R: // reset
-	//	mario->SetState(MARIO_STATE_IDLE);
-	//	mario->SetLevel(MARIO_BIG_FORM);
-	//	mario->SetPosition(150.0f, 0.0f);
-	//	mario->SetSpeed(0, 0);
-	//	break;
+		//case DIK_C:
+		//	CreateKoopa();
+		//	break;
+
 	}
 }
 
@@ -44,33 +34,53 @@ void PlaySceneKeyHandler::OnKeyUp(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyUp: %d\n", KeyCode);
 
-	Mario* mario = (Mario*)((LPPLAYSCENE)Game::GetInstance()->GetCurrentScene())->GetPlayer();
+	Mario* mario = ((PlayScene*)scence)->GetPlayer();
 	switch (KeyCode)
 	{
-	case DIK_DOWN:
-		mario->SetState(MARIO_STATE_SIT_RELEASE);
+	case DIK_J:
+		mario->isPickingUp = false;
+		mario->isPressedJ = false;
 		break;
 	}
 }
 
 void PlaySceneKeyHandler::KeyState(BYTE *states)
 {
-	LPGAME game = Game::GetInstance();
-	Mario* mario = (Mario*)((LPPLAYSCENE)Game::GetInstance()->GetCurrentScene())->GetPlayer();
+	Game* game = Game::GetInstance();
+	Mario* mario = ((PlayScene*)scence)->GetPlayer();
 
+	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DEATH) return;
 	if (game->IsKeyDown(DIK_D))
 	{
-
 		mario->SetDirect(true);
-		mario->SetState(MARIO_STATE_WALKING);
+		if (game->IsKeyDown(DIK_J))
+		{
+			mario->FillUpPowerMelter();
+			mario->PickUp();
+		}
 
+		mario->SetState(MARIO_STATE_WALKING);
+		if (game->IsKeyDown(DIK_A))
+		{
+			mario->SetDirect(false);
+			mario->SetState(MARIO_STATE_BRAKING);
+		}
 	}
 	else if (game->IsKeyDown(DIK_A))
 	{
 		mario->SetDirect(false);
+		if (game->IsKeyDown(DIK_J))
+		{
+			mario->FillUpPowerMelter();
+			mario->PickUp();
+		}
 		mario->SetState(MARIO_STATE_WALKING);
-
+		if (game->IsKeyDown(DIK_D))
+		{
+			mario->SetDirect(true);
+			mario->SetState(MARIO_STATE_BRAKING);
+		}
 	}
 	//else if (game->IsKeyDown(DIK_K))
 	//{
@@ -78,7 +88,12 @@ void PlaySceneKeyHandler::KeyState(BYTE *states)
 	//}
 	else
 	{
+		mario->LosePowerMelter();
 		mario->SetState(MARIO_STATE_IDLE);
+		if (game->IsKeyDown(DIK_J))
+		{
+			mario->PickUp();
+		}
 	}
 
 }

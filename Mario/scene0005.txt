@@ -4,6 +4,8 @@
 # list of object assets to load in this scene
 [ASSETS]
 mario.txt
+goomba.txt
+koopatroopa.txt
 tiles.txt
 #
 [OBJECTS]
@@ -11,9 +13,17 @@ tiles.txt
 # type:  0 = Mario , 1 = Brick, 2 = Goomba,3=KoopaTroopa,4= Ground,6 = Pipe,5 = block
 
 # MARIO
-0	30	200	1
+0	30.0	300	1
+#Goombaa
+#2	200	416	3
+#2	530	416	3
+#2	850	400	3
+#2	896	440	3
+#2	1000	440	3
+#Green Koopa
+3	200	405	4
 #Ground
-4	16	432	15
+4	16.0	432	15
 4	32	432	16
 4	48	432	16
 4	64	432	16
@@ -313,7 +323,7 @@ tiles.txt
 1	256	320	43
 1	432	336	43
 1	672	400	43
-1	720	368	43
+1	720	360	43
 1	1488	384	43
 # Brick
 1	1456	144	42
@@ -337,4 +347,3 @@ tiles.txt
 1	2112	400	42
 1	2112	416	42
 1	2128	416	42
-
