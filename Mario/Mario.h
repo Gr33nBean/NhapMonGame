@@ -23,7 +23,7 @@
 
 #define MARIO_RACCOON_BBOX_WIDTH 24
 #define MARIO_RACCOON_BBOX_HEIGHT 32
-#define MARIO_BBOX_DODGING		18
+#define MARIO_BBOX_SQUAT_HEIGHT		18
 
 #define MARIO_UNTOUCHABLE_TIME 1000
 
@@ -32,7 +32,7 @@
 #define MARIO_WALKING_SPEED		0.1f
 
 #define MARIO_JUMP_SPEED_Y		0.5f
-#define MARIO_LONG_JUMP_SPEED_Y	0.6f
+#define MARIO_SUPER_JUMP_SPEED	0.6f
 
 #define MARIO_JUMP_DEFLECT_SPEED  0.4f
 #define MARIO_BRAKE_DEFLECT_SPEED 0.05f 
@@ -43,7 +43,7 @@
 #define BUFF_SPEED		0.008f //tốc độ tăng lên khi tích stack
 #define POWER_METER_FULL 7 // số stack tối đa
 #define STACK_TIME 200 // thời gian tích 1 stack
-
+#define MARIO_FRICTION		0.08f
 
 // ---- State ----
 
@@ -52,13 +52,17 @@
 #define MARIO_STATE_RUNNING			200
 
 #define MARIO_STATE_JUMPING			300
-#define MARIO_STATE_LONG_JUMPING	400
+#define MARIO_STATE_SUPER_JUMPING	400
 #define MARIO_STATE_BRAKING			500
 #define MARIO_STATE_KICK			600
 #define MARIO_STATE_PICK			700
 #define MARIO_STATE_DEATH			800
 #define MARIO_STATE_STOP			900
-#define MARIO_STATE_DODGE			1000
+#define MARIO_STATE_SQUAT			1000
+#define MARIO_STATE_SHOOT_FIREBALL	1100
+#define MARIO_STATE_TAILATTACK	1200
+#define MARIO_STATE_FLOATING	1300
+#define MARIO_STATE_FLYING		1400
 
 #define MARIO_STATE_RELEASE_JUMP    301
 
@@ -121,11 +125,14 @@
 #define MARIO_ANI_FIRE_DODGE	41
 #define MARIO_ANI_RACCOON_DODGE	42
 
-#define MARIO_ANI_DIE				43
+#define MARIO_ANI_SHOOT_FIRE_BALL	43
+#define MARIO_ANI_TAILATTACK		44
+#define MARIO_ANI_FLOATING			45
+#define MARIO_ANI_FLYING			46
 
+#define MARIO_ANI_DIE				47
 
-
-#define MARIO_LONG_JUMP_TIME 200
+#define MARIO_SUPER_JUMP_TIME 400
 
 class Mario : public GameObject
 {
@@ -133,9 +140,10 @@ class Mario : public GameObject
 	int untouchable;
 	DWORD untouchable_start;
 	DWORD stack_time_start;
+	DWORD jump_time_start; // tính khi nhấn giữ nút tính stack
 	int power_melter_stack;
 	int jump_stack;
-	DWORD long_jump_start; // tính khi nhấn giữ nút tính stack
+
 	bool isInGround;
 	bool isKickShell;
 	bool isDodging;
@@ -153,14 +161,15 @@ class Mario : public GameObject
 	int GetAniIdRaccoon();*/
 
 public:
-	bool isJump;
+	//bool isJump;
 	bool isPickingUp;
 	bool isPressedJ;
+	bool turnFriction;
 	Mario() : GameObject()
 	{
 		
 		untouchable = 0;
-		isJump = false;
+		//isJump = false;
 		isPressedJ = false;
 		power_melter_stack = 0;
 		form = MARIO_BIG_FORM;
@@ -188,7 +197,7 @@ public:
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable);
 	void SetState(int state);
 	void SetLevel(int l);
-	void SetDirect(bool nx);
+	void SetDirect(bool nx);// Set hướng di chuyển cho mario
 
 	int IsCollidable()
 	{ 
@@ -201,16 +210,22 @@ public:
 	//void OnCollisionWith(LPCOLLISIONEVENT e);
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
+
+	void StartJumping() { jump_time_start = GetTickCount64(); }
+	void Jump();
+	void SuperJump();
+
 	void UpForm();
 	
 	void FillUpPowerMelter();
 	void LosePowerMelter();
+
 	void Information();
 	void PickUp();
-	void Jump();
 	void HandleCollision(float min_tx, float min_ty, float nx, float ny, float x0, float y0);
 	int GetWidth();
 	int GetHeight();
-	void Dodge();
-	void Undodge();
+	void Squat();
+	void Skill();
+	void Friction();
 };

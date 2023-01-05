@@ -24,7 +24,7 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	// Simple fall down
 	vy += MARIO_GRAVITY * dt;
-
+	Friction();
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
@@ -46,10 +46,11 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		x += dx;
 		y += dy;
 		/*isInGround = false;*/
-	/*	if (vy > 0.15)
+		//Bug : Ở mặt đất vận tốc cũng có thể lớn hơn 0.15
+		if (vy > 0.2)
 		{
 			isInGround = false;
-		}*/
+		}
 	}
 	else
 	{
@@ -129,7 +130,7 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					y = y0 + dy;
 				}
 			}
-			else if (!dynamic_cast<InvisibleBrick*>(e->obj))
+			if (!dynamic_cast<InvisibleBrick*>(e->obj) && !dynamic_cast<Enemy*>(e->obj))
 			{
 				HandleCollision(min_tx, min_ty, e->nx, e->ny, x0, y0);
 			}
@@ -164,53 +165,63 @@ void Mario::HandleCollision(float min_tx, float min_ty, float nex, float ney, fl
 void Mario::Render()
 {
 	int ani = this->form;
-	//if (vx == 0 && isPickingUp == true)
-	//{
-	//	ani += 32;
-	//}
-	if (vx != 0 && isInGround == true)
+	if (vx == 0 && isPickingUp == true)
 	{
-		if ((vx > 0 && nx > 0) || (vx < 0 && nx < 0))
+		ani += 32;
+	}
+	if (state != MARIO_STATE_SQUAT)
+	{
+		if (vx != 0 && isInGround == true)
 		{
-			/*if (isPickingUp != true)
-			{*/
-			if (power_melter_stack < 2)
-				ani += 4;
-			if (power_melter_stack > 2 && power_melter_stack < 6)
-				ani += 12;
-			if (power_melter_stack == POWER_METER_FULL)
-				ani += 16;
-			DebugOut(L"\nA");
-			/*}
-			else
+			if ((vx > 0 && nx > 0) || (vx < 0 && nx < 0))
 			{
-				ani += 36;
-			}*/
+				if (isPickingUp != true)
+				{
+					if (power_melter_stack < 2)
+						ani += 4;
+					if (power_melter_stack > 2 && power_melter_stack < 6)
+						ani += 12;
+					if (power_melter_stack == POWER_METER_FULL)
+						ani += 16;
+				}
+				else
+				{
+					ani += 36;
+				}
+			}
+			if ((vx > 0 && nx < 0) || ((vx < 0) && (nx > 0)))
+				ani += 24;
 		}
-		if ((vx > 0 && nx < 0) || ((vx < 0) && (nx > 0)))
-			ani += 24;
+		if (!isInGround)
+		{
+			if (power_melter_stack > 6)
+				ani += 20;
+			else
+				ani += 8;
+		}
 	}
-	if (!isInGround)
-	{
-		if (power_melter_stack > 6)
-			ani += 20;
-		else
-			ani += 8;
-		DebugOut(L"\nB");
-	}
-	if (state == MARIO_STATE_KICK)
-	{
-		ani += 28;
-		DebugOut(L"\nC");
-	}
-	if (state == MARIO_STATE_DODGE)
+	else if (state == MARIO_STATE_SQUAT)
 	{
 		ani += 39;
-		DebugOut(L"\nD");
 	}
+	else if (state == MARIO_STATE_KICK)
+	{
+		ani += 28;
 
+	}
+	if (state == MARIO_STATE_SHOOT_FIREBALL)
+	{
+		/*	DebugOut(L"\nC");*/
+		ani = MARIO_ANI_SHOOT_FIRE_BALL;
+	}
+	if (state == MARIO_STATE_TAILATTACK)
+	{
+		/*	DebugOut(L"\nD");*/
+		ani = MARIO_ANI_TAILATTACK;
+	}
 	if (state == MARIO_STATE_DEATH)
 		ani = MARIO_ANI_DIE;
+	DebugOut(L"\nAni: %d", ani);
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 	animation_set->at(ani)->Render(nx, x, y, alpha);
@@ -232,11 +243,13 @@ void Mario::SetState(int state)
 		ny = -1;
 		vy = -MARIO_JUMP_SPEED_Y;
 		break;
-
+	case MARIO_STATE_SUPER_JUMPING:
+		isInGround = false;
+		vy = -MARIO_SUPER_JUMP_SPEED;
+		break;
 	case MARIO_STATE_IDLE:
 		vx = 0;
 		isKickShell = false;
-		isInGround = true;
 		break;
 	case MARIO_STATE_DEATH:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
@@ -250,10 +263,6 @@ void Mario::SetState(int state)
 	case MARIO_STATE_STOP:
 		vx -= 0.01 * vx;
 		break;
-		/*case MARIO_STATE_LONG_JUMPING:
-			vy = -MARIO_LONG_JUMP_SPEED_Y;
-			isInGround = false;
-			break;*/
 	case MARIO_STATE_KICK:
 		isKickShell = true;
 		break;
@@ -263,27 +272,35 @@ void Mario::SetState(int state)
 void Mario::GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable)
 {
 	left = x;
-	top = y;
-
-	if (form == MARIO_BIG_FORM)
+	if (state == MARIO_STATE_SQUAT)
 	{
+		top = y + this->GetHeight() - MARIO_BBOX_SQUAT_HEIGHT;
 		right = x + MARIO_BIG_BBOX_WIDTH;
-		bottom = y + MARIO_BIG_BBOX_HEIGHT;
+		bottom = top + MARIO_BBOX_SQUAT_HEIGHT;
 	}
-	else if (form == MARIO_SMALL_FORM)
+	else
 	{
-		right = x + MARIO_SMALL_BBOX_WIDTH;
-		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
-	}
-	else if (form == MARIO_FIRE_FORM)
-	{
-		right = x + MARIO_FIRE_BBOX_WIDTH;
-		bottom = y + MARIO_FIRE_BBOX_HEIGHT;
-	}
-	else if (form == MARIO_RACCOON_FORM)
-	{
-		right = x + MARIO_RACCOON_BBOX_WIDTH;
-		bottom = y + MARIO_RACCOON_BBOX_HEIGHT;
+		top = y;
+		if (form == MARIO_BIG_FORM)
+		{
+			right = x + MARIO_BIG_BBOX_WIDTH;
+			bottom = top + MARIO_BIG_BBOX_HEIGHT;
+		}
+		else if (form == MARIO_SMALL_FORM)
+		{
+			right = x + MARIO_SMALL_BBOX_WIDTH;
+			bottom = top + MARIO_SMALL_BBOX_HEIGHT;
+		}
+		else if (form == MARIO_FIRE_FORM)
+		{
+			right = x + MARIO_FIRE_BBOX_WIDTH;
+			bottom = y + MARIO_FIRE_BBOX_HEIGHT;
+		}
+		else if (form == MARIO_RACCOON_FORM)
+		{
+			right = x + MARIO_RACCOON_BBOX_WIDTH;
+			bottom = y + MARIO_RACCOON_BBOX_HEIGHT;
+		}
 	}
 
 }
@@ -326,41 +343,6 @@ void Mario::UpForm()
 	}
 	y -= diffy;
 }
-
-//void Mario::Jump()
-//{
-//	DWORD current = GetTickCount64();
-//	if (current - long_jump_start > MARIO_LONG_JUMP_TIME && isInGround == true
-//		&& long_jump_start != 0)
-//	{
-//		// nếu Mario chưa tiếp đất hoặc vật thì ko cho phép nhảy
-//		this->SetState(MARIO_STATE_LONG_JUMPING);
-//		isJump == false;
-//		long_jump_start = 0;
-//	}
-//
-//
-//}
-//void Mario::unJump()
-//{
-//	DWORD current = GetTickCount64();
-//	if (current - long_jump_start < MARIO_LONG_JUMP_TIME && this->isInGround == true && isJump == true)
-//	{
-//		// nếu Mario chưa tiếp đất hoặc vật thì ko cho phép nhảy
-//		// không cho phép nhảy ngắn khi Mario đã nhảy
-//		this->SetState(MARIO_STATE_JUMPING);
-//		DebugOut(L"\nxyz");
-//
-//	}
-//	else
-//	{
-//		DebugOut(L"\nisInGround %d", isInGround);
-//		DebugOut(L"\nisJump %d", isJump);
-//		DebugOut(L"\nC: %d - L: %d", current, long_jump_start);
-//	}
-//	isJump = false;
-//	long_jump_start = 0;
-//}
 
 void Mario::FillUpPowerMelter()// Tăng stack năng lượng của Mario
 {
@@ -407,8 +389,8 @@ void Mario::LosePowerMelter()// Power Stack sẽ cạn theo thời gian
 
 void Mario::Information()
 {
-	DebugOut(L"\nX: %d, Y: %d", this->x, this->y);
-	DebugOut(L"\nVx: %f, Vy: %f", this->vx, this->vy);
+	DebugOut(L"\nMario Vx: %f ", vx);
+	DebugOut(L"\nState %d", state);
 }
 void Mario::PickUp()
 {
@@ -422,11 +404,28 @@ void Mario::SetDirect(bool nx)
 	else
 		this->nx = -1;
 }
-void Mario::Jump()
+void Mario::SuperJump()
 {
-	if (isInGround)
+	/*if (isInGround)
 	{
 		this->SetState(MARIO_STATE_JUMPING);
+	}*/
+	DWORD current = GetTickCount64();
+	if (current - jump_time_start > MARIO_SUPER_JUMP_TIME && isInGround == true
+		&& jump_time_start != 0)
+	{
+		this->SetState(MARIO_STATE_SUPER_JUMPING);
+		jump_time_start = 0;
+	}
+}
+void Mario::Jump()
+{
+	DWORD current = GetTickCount64();
+	if (current - jump_time_start < MARIO_SUPER_JUMP_TIME && isInGround == true
+		&& jump_time_start != 0)
+	{
+		this->SetState(MARIO_STATE_JUMPING);
+		jump_time_start = 0;
 	}
 }
 int  Mario::GetWidth()
@@ -443,22 +442,33 @@ int Mario::GetHeight()
 	else
 		return 32;
 }
-void Mario::Dodge()
+void Mario::Squat()
 {
-	isInGround = true;
-	if (form != MARIO_SMALL_FORM && isDodging == false)
+	if (form != MARIO_SMALL_FORM)
 	{
-		y += (this->GetHeight() - MARIO_BBOX_DODGING) - 10;
-		this->SetState(MARIO_STATE_DODGE);
-		isDodging = true;
+		//Bug : Cộng Y quá nhiều
+		this->SetState(MARIO_STATE_SQUAT);
 	}
 }
-void Mario::Undodge()
-{
-	if (this->state == MARIO_STATE_DODGE)
-	{
-		y -= (this->GetHeight() - MARIO_BBOX_DODGING);
-		isDodging = false;
-	}
 
+void Mario::Skill()
+{
+	if (form == MARIO_FIRE_FORM)
+		this->SetState(MARIO_STATE_SHOOT_FIREBALL);
+	if (form == MARIO_RACCOON_FORM)
+		this->SetState(MARIO_STATE_TAILATTACK);
+}
+void Mario::Friction()
+{
+
+	if (turnFriction == true)
+	{
+		this->vx -= this->vx * MARIO_FRICTION;
+		if (abs(this->vx) < 0.007)
+		{
+			this->SetState(MARIO_STATE_IDLE);
+			turnFriction = false;
+		}
+
+	}
 }

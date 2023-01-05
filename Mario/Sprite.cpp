@@ -48,7 +48,7 @@ void Sprite::Draw(int nx, float x, float y, int alpha)
 	x = (FLOAT)floor(x);
 	y = (FLOAT)floor(y);
 
-	D3DXMatrixTranslation(&matTranslation, x - cx, game->GetScreenHeight() - y + cy, 0.2f);
+	D3DXMatrixTranslation(&matTranslation, x - cx, game->GetScreenHeight() - y + cy, 0.1f);
 	
 	this->sprite.matWorld = (this->matScaling * matTranslation );
 
