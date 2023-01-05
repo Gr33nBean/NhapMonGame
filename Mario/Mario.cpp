@@ -14,7 +14,7 @@
 #include "Ground.h"
 #include "Brick.h"
 #include "Pipe.h"
-
+#include "FireBall.h"
 #include "Collision.h"
 
 void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -68,13 +68,21 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			if (dynamic_cast<Enemy*>(e->obj))
 			{
 				Enemy* enemy = dynamic_cast<Enemy*>(e->obj);
-				if (e->ny < 0)
+				if (e->ny != 0)
 				{
-					if (enemy->IsDead() != true)
+					if (e->ny < 0)
 					{
-						enemy->SetDie(false);//false == Mario stromp in enemy
-						isInGround = true;
-						vy = -MARIO_JUMP_DEFLECT_SPEED;
+						if (enemy->IsDead() != true)
+						{
+							//false: Mario giậm lên quái, true sẽ là va chạm ngang nhờ ném shell hoặc bắn fireball
+							enemy->SetDie(false);//false == Mario stromp in enemy
+							isInGround = true;
+							vy = -MARIO_JUMP_DEFLECT_SPEED;
+						}
+						else
+						{
+							HandleCollision(min_tx, min_ty, nex, ney, x0, y0);
+						}
 					}
 				}
 				else if (e->nx != 0)
@@ -92,31 +100,30 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 								SetState(MARIO_STATE_DEATH);
 						}
 
-						else
+						else if (dynamic_cast<KoopaTroopa*>(enemy)->state == KOOPATROOPA_STATE_HIDING)
 						{
-							if (dynamic_cast<KoopaTroopa*>(enemy)->state == KOOPATROOPA_STATE_HIDING)
+							if (isPressedJ == true)
 							{
-								if (isPressedJ == true)
-								{
-									dynamic_cast<KoopaTroopa*>(enemy)->PickUpBy(this);
-									isPickingUp = true;
-								}
-								else
-								{
-									HandleCollision(min_tx, min_ty, e->nx, e->ny, x0, y0);
-									dynamic_cast<KoopaTroopa*>(enemy)->isPickedUp = false;
-									dynamic_cast<KoopaTroopa*>(enemy)->IsKicked(this->nx);
-									this->SetState(MARIO_STATE_KICK);
-								}
+								dynamic_cast<KoopaTroopa*>(enemy)->PickUpBy(this);
+								isPickingUp = true;
+							}
+							else if(isPressedJ == false)
+							{
+								HandleCollision(min_tx, min_ty, e->nx, e->ny, x0, y0);
+								dynamic_cast<KoopaTroopa*>(enemy)->isPickedUp = false;
+								dynamic_cast<KoopaTroopa*>(enemy)->IsKicked(this->nx);
+								this->SetState(MARIO_STATE_KICK);
 							}
 						}
 					}
-
-
-
-
 				}
 			}
+			else if (!dynamic_cast<InvisibleBrick*>(e->obj))
+			{
+
+				HandleCollision(min_tx, min_ty, e->nx, e->ny, x0, y0);
+			}
+
 			if (dynamic_cast<Block*>(e->obj))
 			{
 				if (e->ny < 0)
@@ -130,10 +137,7 @@ void Mario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					y = y0 + dy;
 				}
 			}
-			if (!dynamic_cast<InvisibleBrick*>(e->obj) && !dynamic_cast<Enemy*>(e->obj))
-			{
-				HandleCollision(min_tx, min_ty, e->nx, e->ny, x0, y0);
-			}
+			
 		}
 
 
@@ -192,12 +196,14 @@ void Mario::Render()
 			if ((vx > 0 && nx < 0) || ((vx < 0) && (nx > 0)))
 				ani += 24;
 		}
-		if (!isInGround)
+		if (!isInGround && !isPickingUp)
 		{
 			if (power_melter_stack > 6)
 				ani += 20;
 			else
 				ani += 8;
+			if (state == MARIO_STATE_FLOATING)
+				ani = MARIO_ANI_FLOATING;
 		}
 	}
 	else if (state == MARIO_STATE_SQUAT)
@@ -221,7 +227,7 @@ void Mario::Render()
 	}
 	if (state == MARIO_STATE_DEATH)
 		ani = MARIO_ANI_DIE;
-	DebugOut(L"\nAni: %d", ani);
+	//DebugOut(L"\nAni: %d", ani);
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 	animation_set->at(ani)->Render(nx, x, y, alpha);
@@ -265,6 +271,9 @@ void Mario::SetState(int state)
 		break;
 	case MARIO_STATE_KICK:
 		isKickShell = true;
+		break;
+	case MARIO_STATE_FLOATING:
+		this->vy -= 1.1 * MARIO_GRAVITY;
 		break;
 	}
 }
@@ -389,7 +398,7 @@ void Mario::LosePowerMelter()// Power Stack sẽ cạn theo thời gian
 
 void Mario::Information()
 {
-	DebugOut(L"\nMario Vx: %f ", vx);
+	DebugOut(L"\nMario Vy: %f ", vy);
 	DebugOut(L"\nState %d", state);
 }
 void Mario::PickUp()
@@ -451,12 +460,18 @@ void Mario::Squat()
 	}
 }
 
-void Mario::Skill()
+int Mario::Skill()
 {
 	if (form == MARIO_FIRE_FORM)
-		this->SetState(MARIO_STATE_SHOOT_FIREBALL);
+	{
+		return 1;
+	}
 	if (form == MARIO_RACCOON_FORM)
-		this->SetState(MARIO_STATE_TAILATTACK);
+	{
+		return 2;
+	}
+	else
+		return 0;
 }
 void Mario::Friction()
 {
@@ -471,4 +486,19 @@ void Mario::Friction()
 		}
 
 	}
+}
+GameObject* Mario::ShootFireBall()
+{
+	this->SetState(MARIO_STATE_SHOOT_FIREBALL);
+	FireBall* fireBall;
+	if (nx > 0)
+		fireBall = new FireBall(this->x + 15, this->y + 10, this->nx);
+	else
+		fireBall = new FireBall(this->x - 15, this->y + 10, this->nx);
+	return fireBall;
+}
+void Mario::TailAttack()
+{
+	this->nx = (-1) * this->nx;
+	this->SetState(MARIO_STATE_TAILATTACK);
 }

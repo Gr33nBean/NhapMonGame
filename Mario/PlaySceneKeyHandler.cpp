@@ -23,7 +23,18 @@ void PlaySceneKeyHandler::OnKeyDown(int KeyCode)
 		mario->Information();
 		break;
 	case DIK_J:
-		mario->Skill();
+		int flag = mario->Skill();
+
+		if (flag == 1)
+		{
+			GameObject* fireBall = mario->ShootFireBall();
+			((PlayScene*)scence)->AddObject((FireBall*)fireBall);
+		}
+		if (flag == 2)
+		{
+			mario->TailAttack();
+		}
+
 		break;
 		//case DIK_C:
 		//	CreateKoopa();
@@ -53,6 +64,8 @@ void PlaySceneKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_K:
 		mario->Jump();
 		break;
+	case DIK_S:
+		mario->SetState(MARIO_STATE_IDLE);
 	}
 }
 

@@ -393,3 +393,9 @@ void PlayScene::PurgeDeletedObjects()
 		std::remove_if(objects.begin(), objects.end(), PlayScene::IsGameObjectDeleted),
 		objects.end());
 }
+
+void PlayScene::AddObject(GameObject* obj)
+{
+	this->objects.push_back(obj);
+	DebugOut(L"Size: %d", this->objects.size());
+}

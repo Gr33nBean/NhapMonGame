@@ -31,13 +31,14 @@
 
 #define MARIO_WALKING_SPEED		0.1f
 
-#define MARIO_JUMP_SPEED_Y		0.5f
-#define MARIO_SUPER_JUMP_SPEED	0.6f
+#define MARIO_JUMP_SPEED_Y		0.3f
+#define MARIO_SUPER_JUMP_SPEED	0.5f
 
 #define MARIO_JUMP_DEFLECT_SPEED  0.4f
 #define MARIO_BRAKE_DEFLECT_SPEED 0.05f 
 
 #define MARIO_GRAVITY			0.002f
+#define MARIO_LOWER_GRAVITY		0.001f
 #define MARIO_DIE_DEFLECT_SPEED	 0.5f 
 
 #define BUFF_SPEED		0.008f //tốc độ tăng lên khi tích stack
@@ -132,7 +133,7 @@
 
 #define MARIO_ANI_DIE				47
 
-#define MARIO_SUPER_JUMP_TIME 400
+#define MARIO_SUPER_JUMP_TIME 200
 
 class Mario : public GameObject
 {
@@ -143,8 +144,8 @@ class Mario : public GameObject
 	DWORD jump_time_start; // tính khi nhấn giữ nút tính stack
 	int power_melter_stack;
 	int jump_stack;
-
 	bool isInGround;
+
 	bool isKickShell;
 	bool isDodging;
 	
@@ -226,6 +227,9 @@ public:
 	int GetWidth();
 	int GetHeight();
 	void Squat();
-	void Skill();
+	int Skill();
 	void Friction();
+	GameObject* ShootFireBall();
+	void TailAttack();
+	void Float();
 };

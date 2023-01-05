@@ -11,7 +11,7 @@
 #include "Block.h"
 #include "Ground.h"
 #include "Pipe.h"
-
+#include"FireBall.h"
 
 class PlayScene: public Scene
 {
@@ -43,6 +43,8 @@ public:
 	virtual void Unload();
 
 	Mario* GetPlayer() { return player; }
+	void AddObject(GameObject* obj);
+
 
 	void Clear();
 	void PurgeDeletedObjects();
