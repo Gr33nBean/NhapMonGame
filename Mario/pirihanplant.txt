@@ -15,10 +15,63 @@
 30045	209	0	215	16	70
 30046	216	0	232	16	70
 30047	233	0	249	16	70
+#FIRE PIRANHAPLANT	
+#GREEN
+#darting - bottom
+30050	48	143	64	176	70
+#darting- top
+30051	80	143	96	176	70
+#shooting - bottom
+30052	32	145	47	176	70
+#shooting - top
+30053	65	143	80	176	70
+#RED
+#darting - bottom
+30054	144	144	160	176	70
+#daring - top
+30055	177	144	190	176	70
+#shoot - bottom
+30056	127	145	143	176	70
+#shoot - top
+30057	161	144	176	176	70
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
-
+#=====GREEN PIRANHAPLANT=====
+#darting
+730	30041	100
+#biting
+731	30041	100	30040	100
+#====RED PIRANHAPLANT=====
+#darting
+732	30043	100
+#biting
+733	30043	100	30042	100
+# PIRIHAPLANT DEATH
+734	30044	100	30044	100	30046	100	30047	100
+#===FIRE PIRANHAPLANT====
+#GREEN
+#darting bottom
+735	30050	100
+#darting top
+736	30051	100
+#shooting bottom
+737	30052	100
+#shooting top
+738	30053	100
+#RED
+#darting bottom
+739	30054	100
+#darting top 
+740	30055	100
+#shoot bottom
+741	30056	100
+#shoot top
+742	30057	100
 
 # id	ani1	ani2	ani3
 [ANIMATION_SETS]
+#Green/Red PiranhaPlant
+5	730	731	732	733	734
+#Fire PiranhaPlant
+6	735	736	737	738	739	740	741

@@ -147,6 +147,8 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationFrame.h" />
     <ClInclude Include="Animations.h" />
+    <ClInclude Include="FirePiranhaPlant.h" />
+    <ClInclude Include="FirePlantBullet.h" />
     <ClInclude Include="PiranhaPlant.h" />
     <ClInclude Include="ThongSo.h" />
     <ClInclude Include="Block.h" />
@@ -164,9 +166,7 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="KoopaTroopa.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Mario.h" />
-    <ClInclude Include="MovingPlatform.h" />
     <ClInclude Include="Pipe.h" />
-    <ClInclude Include="Platform.h" />
     <ClInclude Include="PlayScene.h" />
     <ClInclude Include="Portal.h" />
     <ClInclude Include="PlaySceneKeyHandler.h" />
@@ -187,6 +187,8 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="FireBall.cpp" />
+    <ClCompile Include="FirePiranhaPlant.cpp" />
+    <ClCompile Include="FirePlantBullet.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Goomba.cpp" />
@@ -197,7 +199,6 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="Mario.cpp" />
     <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="PiranhaPlant.cpp" />
-    <ClCompile Include="Platform.cpp" />
     <ClCompile Include="PlayScene.cpp" />
     <ClCompile Include="Portal.cpp" />
     <ClCompile Include="PlaySceneKeyHandler.cpp" />

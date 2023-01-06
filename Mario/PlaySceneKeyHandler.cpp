@@ -75,7 +75,7 @@ void PlaySceneKeyHandler::OnKeyUp(int KeyCode)
 	switch (KeyCode)
 	{
 	case DIK_J:
-		mario->LosePowerMelter();
+		
 		mario->ReleaseJ();
 		//mario->SetState(MARIO_STATE_IDLE);
 		break;
@@ -124,7 +124,7 @@ void PlaySceneKeyHandler::KeyState(BYTE *states)
 			}
 		}
 	}
-	else if (game->IsKeyDown(DIK_A))
+	if (game->IsKeyDown(DIK_A))
 	{
 		mario->SetDirect(false);
 		if (!mario->IsFlying() && !mario->IsFloating())
@@ -162,7 +162,7 @@ void PlaySceneKeyHandler::KeyState(BYTE *states)
 	}
 	else
 	{
-		//mario->LosePowerMelter();
+		mario->LosePowerMelter();
 		/*	mario->SetState(MARIO_STATE_IDLE);*/
 		/*	mario->turnFriction = true;*/
 		if (game->IsKeyDown(DIK_J))

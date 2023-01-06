@@ -173,6 +173,26 @@ void PlayScene::_ParseSection_OBJECTS(string line)
 		obj = new InvisibleBrick(set_type);
 		break;
 	}
+	case OBJECT_TYPE_PIRANHAPLANT:
+	{
+		int set_type = atoi(tokens[4].c_str());
+		obj = new PiranhaPlant(x, y, set_type);
+		break;
+	}
+	case OBJECT_TYPE_FIREPIRANHAPLANT:
+	{
+		int set_type = atoi(tokens[4].c_str());
+		obj = new FirePiranhaPlant(x, y, set_type);
+		break;
+	}
+	case OBJECT_TYPE_FIREPLANTBULLET:
+	{
+
+		obj = new FirePlantBullet();
+		break;
+	}
+	case OBJECT_TYPE_COIN:
+		obj = new Coin(); break;
 	default:
 		DebugOut(L"[ERROR] Invalid object type: %d\n", object_type);
 		return;
@@ -185,6 +205,8 @@ void PlayScene::_ParseSection_OBJECTS(string line)
 
 	obj->SetAnimationSet(ani_set);
 	objects.push_back(obj);
+	if (object_type == OBJECT_TYPE_FIREPLANTBULLET)
+		firebullet = ((FirePlantBullet*)obj);
 }
 
 void PlayScene::LoadAssets(LPCWSTR assetFile)
@@ -301,45 +323,57 @@ void PlayScene::Update(DWORD dt)
 	int mapHeight = map->GetMapHeiht();
 	int oldCamY = game->GetCamY();
 
-	/*cx -= game->GetScreenWidth() / 2;
-	cy -= game->GetScreenHeight() / 2;*/
 	TurnCamY(cy, player->IsFlying(), screenHeight, mapHeight);
-	if (cx - (screenWidth / 2) <= 16)
+	int Sx = 16, Sy = oldCamY;
+	cx -= screenWidth / 2;
+	cy -= screenHeight / 2;
+	//if (player->x - screenWidth / 2 <= 16)
+	//{
+	//	cx = 16;
+	//}
+	//else if (player->x + screenWidth / 2 > mapWidth - 16)
+	//	cx = (mapWidth - 16) - screenWidth;
+	//if (player->y - screenHeight  < 16)
+	//{
+	//	cy = 16;
+	//}
+	//else
+	//{
+	//	if (_turnCamY)
+	//		cy -= screenHeight / 2;
+	//}
+	// if (player->y + SCREEN_HEIGHT >= 448)
+	//{
+	//	if(_turnCamY && player->y + screenHeight /2 >= 448)
+	//		cy = 448 - screenHeight;
+	//	else if(!_turnCamY)
+	//		cy = 448 - screenHeight;
+	//}
+	if (player->x < 16 + game->GetScreenWidth() / 2)
 	{
-		cx = 16;
+		Sx = 16;
 	}
-	else if (cx + (screenWidth / 2) > (mapWidth - 16))
+	if (player->x > 16 + game->GetScreenWidth() / 2)
 	{
-		cx = (mapWidth - 16) - screenWidth;
+		Sx = cx;
 	}
+	if (player->x + game->GetScreenWidth() / 2 > mapWidth - 16)
+	{
+		Sx = (mapWidth - 16) - screenWidth;
+	}
+	if (player->y + screenHeight > 448)
+	{
+		Sy = 448 - screenHeight;
+	}
+	if (player->y - screenHeight / 2 < 16)
+		Sy = 16;
 	else
 	{
-		cx -= (screenWidth / 2);
-	}
-	if (_turnCamY == false)
-	{
-		if (cy + SCREEN_HEIGHT > 448)
-		{
-			cy = 448 - screenHeight;
-		}
-		else if (cy - screenHeight < 16)
-		{
-			cy = 16;
-		}
-	}
-	else
-	{
-		if (cy - (screenHeight / 2) < 16)
-			cy = 16;
-		else if (cy + (screenHeight / 2) >= 448)
-			cy = 448 - screenHeight;
-		else
-		{
-			cy -= screenHeight / 2;
-		}
+		if (_turnCamY)
+			Sy = cy;
 	}
 
-	Game::GetInstance()->SetCamPos(round(cx), round(cy));
+	Game::GetInstance()->SetCamPos(round(Sx), round(Sy));
 }
 
 void PlayScene::Render()
@@ -410,13 +444,9 @@ void PlayScene::AddObject(GameObject* obj)
 
 void PlayScene::TurnCamY(float _playerY, bool isFlying, int ScreenHeight, int MapHeight)
 {
-	if (_turnCamY == true && _playerY > 448 - ScreenHeight / 2
-		)
+	if (_turnCamY == true && _playerY > 448 - ScreenHeight / 2)
 	{
-		if (isFlying != true)
-			_turnCamY = false;
-		else
-			_turnCamY = true;
+		_turnCamY = false;
 	}
 
 	if (isFlying == true)

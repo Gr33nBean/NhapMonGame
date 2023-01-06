@@ -53,13 +53,16 @@ public:
 
 	void RenderBoundingBox();
 
-	void SetAnimationSet(LPANIMATION_SET ani_set) { animation_set = ani_set; }
+	void SetAnimationSet(LPANIMATION_SET ani_set)
+	{
+		animation_set = ani_set;
+	}
 
 	GameObject();
 	GameObject(float x, float y) :GameObject() { this->x = x; this->y = y; }
 
 
-	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom, bool isEnable) = 0;
+	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable) = 0;
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render() = 0;
 	
@@ -73,20 +76,6 @@ public:
 		float& min_ty,
 		float& nx,
 		float& ny);
-
-	//
-	// Collision ON or OFF ? This can change depending on object's state. For example: die
-	//
-	virtual int IsCollidable() { return 0; };
-
-	// When no collision has been detected (triggered by CCollision::Process)
-	virtual void OnNoCollision(DWORD dt) {};
-
-	// When collision with an object has been detected (triggered by CCollision::Process)
-	virtual void OnCollisionWith(LPCOLLISIONEVENT e) {};
-	
-	// Is this object blocking other object? If YES, collision framework will automatically push the other object
-	virtual int IsBlocking() { return 1; }
 
 	~GameObject();
 

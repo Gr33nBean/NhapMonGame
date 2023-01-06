@@ -1,25 +1,23 @@
 #pragma once
 #include"GameObject.h"
-#include "Animations.h"
-#include "ThongSo.h"
-
-class FireBall : public GameObject
+#include"ThongSo.h"
+class FirePlantBullet :public GameObject
 {
-	DWORD explodeTime;
 public:
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b, bool isEnable);
 	virtual void SetState(int state);
-	FireBall(int _x, int _y, int _nx)
+	void Shoot(int _x, int _y, int _nx, int _direct)
 	{
 		this->x = _x;
 		this->y = _y;
 		this->isEnable = true;
-		LPANIMATION_SET ani_set = AnimationSets::GetInstance()->Get(60);
-		this->SetAnimationSet(ani_set);
 		this->nx = _nx;
-		this->SetState(FIREBALL_STATE_NORMAL);
+		this->SetState(_direct);
+	}
+	FirePlantBullet()
+	{
+		this->isEnable = false;
 	}
 };
-typedef FireBall* LPFireBall;

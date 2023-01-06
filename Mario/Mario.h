@@ -24,7 +24,7 @@ class Mario : public GameObject
 	bool isDodging;
 	bool isFlying = false;
 	bool isFloating = false;
-
+	bool isBraking = false;
 public:
 	// Chuyển thành hàm
 	bool isPickingUp;
@@ -39,7 +39,8 @@ public:
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* colliable_objects = NULL);
 	virtual void Render();
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable);
-
+	virtual void CalcPotentialCollisions(vector<LPGAMEOBJECT>* coObjects,
+		vector<LPCOLLISIONEVENT>& coEvents);
 
 	void SetState(int state);
 	void SetLevel(int l) { form = l; }
@@ -69,7 +70,7 @@ public:
 	void TailAttack();
 	void Float();
 	void Fly();
-	void StartJumping() { jump_time_start = GetTickCount(); }
+	void StartJumping() { jump_time_start = GetTickCount64(); }
 	void Jump();
 	void SuperJump();
 	void PickUp();

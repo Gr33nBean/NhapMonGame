@@ -36,32 +36,12 @@ void KoopaTroopa::GetBoundingBox(float& left, float& top,
 }
 void KoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	Game* game = Game::GetInstance();
+	LPSCENE scence = game->GetCurrentScene();
+	Mario* mario = ((PlayScene*)scence)->GetPlayer();
+	HandleTimeSwitchState();
 	if (state == KOOPATROOPA_STATE_INACTIVE)
 		return;
-	if (GetTickCount64() - time_death > KOOPATROOPA_INACTIVE_TIME &&
-		this->state == KOOPATROOPA_STATE_BEING_SKILLED)
-	{
-		this->SetState(KOOPATROOPA_STATE_INACTIVE);
-		return;
-	}
-	if (GetTickCount64() - turnWalkingTime >
-		KOOPATROOPA_TURN_WALKING_TIME &&
-		this->state == KOOPATROOPA_STATE_EXIT_SHELL)
-	{
-		this->SetState(KOOPATROOPA_STATE_WALKING);
-		this->y -= KOOPATROOPA_BBOX_HEIGHT -
-			KOOPATROOPA_BBOX_HEIGHT_HIDING;
-		turnWalkingTime = 0;
-	}
-	if (GetTickCount64() - hidingTime >
-		KOOPATROOPA_EXIT_SHELL_TIME &&
-		this->state == KOOPATROOPA_STATE_HIDING)
-	{
-		this->SetState(KOOPATROOPA_STATE_EXIT_SHELL);
-		hidingTime = 0;
-		turnWalkingTime = GetTickCount64();
-	}
-
 	Enemy::Update(dt, coObjects);
 	vy += KOOPATROOPA_GRAVITY * dt;
 
@@ -185,7 +165,7 @@ void KoopaTroopa::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			if (dynamic_cast<InvisibleBrick*>(e->obj))
 			{
 				//chỉ đối với RedKoopa
-				if (type == 0)
+				if (type == KOOPATROOPA_RED_TYPE)
 				{
 					if (state != KOOPATROOPA_STATE_HIDING && state != KOOPATROOPA_STATE_IS_BUMPED)
 					{
@@ -250,35 +230,35 @@ void KoopaTroopa::Render()
 
 			if (state == KOOPATROOPA_STATE_WALKING)
 			{
-				if (type == KOOPATROOPA_TYPE_GREEN)
+				if (type == KOOPATROOPA_GREEN_TYPE)
 					ani = KOOPATROOPA_GREEN_ANI_WALKING;
 				else
 					ani = KOOPATROOPA_RED_ANI_WALKING;
 			}
 			else if (state == KOOPATROOPA_STATE_HIDING)
 			{
-				if (type == KOOPATROOPA_TYPE_GREEN)
+				if (type == KOOPATROOPA_GREEN_TYPE)
 					ani = KOOPATROOPA_GREEN_ANI_HIDING;
 				else
 					ani = KOOPATROOPA_RED_ANI_HIDING;
 			}
 			if (state == KOOPATROOPA_STATE_BEING_SKILLED)
 			{
-				if (type == KOOPATROOPA_TYPE_GREEN)
+				if (type == KOOPATROOPA_GREEN_TYPE)
 					ani = KOOPATROOPA_GREEN_ANI_DEATH;
 				else
 					ani = KOOPATROOPA_RED_ANI_DEATH;
 			}
 			if (isBumped == true)
 			{
-				if (type == KOOPATROOPA_TYPE_GREEN)
+				if (type == KOOPATROOPA_GREEN_TYPE)
 					ani = KOOPATROOPA_GREEN_ANI_BUMPING;
 				else
 					ani = KOOPATROOPA_RED_ANI_BUMPING;
 			}
 			if (state == KOOPATROOPA_STATE_EXIT_SHELL)
 			{
-				if (type == KOOPATROOPA_TYPE_GREEN)
+				if (type == KOOPATROOPA_GREEN_TYPE)
 					ani = KOOPATROOPA_GREEN_ANI_EXIT_SHELL;
 				else
 					ani = KOOPATROOPA_RED_ANI_EXIT_SHELL;
@@ -353,7 +333,7 @@ bool KoopaTroopa::IsHiding()
 void KoopaTroopa::PickUpBy(Mario* mario)
 {
 	isPickedUp = true;
-	this->mario = mario;
+	//this->mario = mario;
 }
 KoopaTroopa::KoopaTroopa(int x, int y, int _type) : Enemy(x, y)
 {
@@ -371,10 +351,38 @@ void KoopaTroopa::SetBeingStromped()
 void KoopaTroopa::SetBeingSkilled()
 {
 	this->SetState(KOOPATROOPA_STATE_BEING_SKILLED);
-	time_death = GetTickCount64();
+	deathTime = GetTickCount64();
 }
 void KoopaTroopa::EnableAgain()
 {
 	Enemy::EnableAgain();
 	this->SetState(KOOPATROOPA_STATE_WALKING);
+}
+void KoopaTroopa::HandleTimeSwitchState()
+{
+
+	if (GetTickCount() - deathTime > KOOPATROOPA_INACTIVE_TIME &&
+		this->state == KOOPATROOPA_STATE_BEING_SKILLED)
+	{
+		this->SetState(KOOPATROOPA_STATE_INACTIVE);
+		return;
+	}
+	if (GetTickCount() - turnWalkingTime >
+		KOOPATROOPA_TURN_WALKING_TIME &&
+		this->state == KOOPATROOPA_STATE_EXIT_SHELL)
+	{
+		this->SetState(KOOPATROOPA_STATE_WALKING);
+		this->y -= KOOPATROOPA_BBOX_HEIGHT -
+			KOOPATROOPA_BBOX_HEIGHT_HIDING;
+		turnWalkingTime = 0;
+	}
+	if (GetTickCount() - hidingTime >
+		KOOPATROOPA_EXIT_SHELL_TIME &&
+		this->state == KOOPATROOPA_STATE_HIDING)
+	{
+		this->SetState(KOOPATROOPA_STATE_EXIT_SHELL);
+		hidingTime = 0;
+		turnWalkingTime = GetTickCount();
+	}
+
 }

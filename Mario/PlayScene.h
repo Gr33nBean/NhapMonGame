@@ -12,6 +12,11 @@
 #include "Ground.h"
 #include "Pipe.h"
 #include"FireBall.h"
+#include"PiranhaPlant.h"
+#include"Coin.h"
+#include"FirePiranhaPlant.h"
+#include"FirePlantBullet.h"
+
 
 class PlayScene: public Scene
 {
@@ -23,6 +28,7 @@ protected:
 
 	Map* map;
 	bool _turnCamY;
+	FirePlantBullet* firebullet;
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
 
@@ -44,6 +50,7 @@ public:
 
 	void TurnCamY(float _playerY, bool isFlying, int ScreenHeight, int MapHeight);
 	Mario* GetPlayer() { return player; }
+	FirePlantBullet* GetPlantBullet() { return firebullet; }
 	void AddObject(GameObject* obj);
 
 

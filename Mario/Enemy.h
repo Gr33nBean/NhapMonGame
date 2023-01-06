@@ -3,7 +3,7 @@
 class Enemy :public GameObject
 {
 protected:
-	DWORD time_death;
+	DWORD deathTime;
 	float entryX, entryY;
 public:
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable) = 0;
@@ -14,6 +14,7 @@ public:
 
 	virtual void SetBeingStromped() = 0;
 	virtual void SetBeingSkilled() = 0;
+	virtual void HandleTimeSwitchState() = 0;
 
 	virtual void SetEntryPosition(float x, float y);
 	void SetEnable() { this->isEnable = true; };

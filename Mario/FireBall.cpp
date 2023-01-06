@@ -89,6 +89,11 @@ void FireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					this->SetState(FIREBALL_STATE_EXPLODE);
 					explodeTime = GetTickCount64();
 				}
+				else
+				{
+					x += dx;
+					y += dy;
+				}
 
 			}
 		}
