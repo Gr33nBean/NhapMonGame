@@ -22,7 +22,7 @@ protected:
 	vector<LPGAMEOBJECT> objects;
 
 	Map* map;
-
+	bool _turnCamY;
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
 
@@ -42,6 +42,7 @@ public:
 	virtual void Render();
 	virtual void Unload();
 
+	void TurnCamY(float _playerY, bool isFlying, int ScreenHeight, int MapHeight);
 	Mario* GetPlayer() { return player; }
 	void AddObject(GameObject* obj);
 

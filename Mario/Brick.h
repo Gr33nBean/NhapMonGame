@@ -3,9 +3,8 @@
 #include "GameObject.h"
 #include "Animation.h"
 #include "Animations.h"
+#include "ThongSo.h"
 
-#define BRICK_BBOX_WIDTH 16
-#define BRICK_BBOX_HEIGHT 16
 
 class Brick : public GameObject {
 public:
@@ -14,10 +13,6 @@ public:
 	void Render();
 	void GetBoundingBox(float& l, float& t, float& r, float& b, bool isEnable);
 };
-
-#define INVISIBLEBRICK_TYPE_GROUND	0
-#define INVISIBLEBRICK_TYPE_BLOCK	1
-
 
 class InvisibleBrick : public GameObject
 {

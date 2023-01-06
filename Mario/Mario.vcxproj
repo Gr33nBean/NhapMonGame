@@ -147,7 +147,8 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationFrame.h" />
     <ClInclude Include="Animations.h" />
-    <ClInclude Include="AssetIDs.h" />
+    <ClInclude Include="PiranhaPlant.h" />
+    <ClInclude Include="ThongSo.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Brick.h" />
     <ClInclude Include="Coin.h" />
@@ -195,6 +196,7 @@ dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Mario.cpp" />
     <ClCompile Include="Pipe.cpp" />
+    <ClCompile Include="PiranhaPlant.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="PlayScene.cpp" />
     <ClCompile Include="Portal.cpp" />

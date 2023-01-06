@@ -51,13 +51,13 @@ void Goomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}*/
 	if (state == GOOMBA_STATE_INACTIVE)
 		return;
-	if (GetTickCount64() - time_death > GOOMBA_INACTIVE_TIME && this->IsDead() == true)
+	if (GetTickCount64() - time_death > GOOMA_INACTIVE_TIME && this->IsDead() == true)
 	{
 		this->SetState(GOOMBA_STATE_INACTIVE);
 		return;
 	}
 	Enemy::Update(dt, coObjects);
-	if (this->state != GOOMBA_STATE_DIE_NY)
+	if (this->state != GOOMBA_STATE_BEING_STROMPED)
 		vy += dt * GOOMBA_GRAVITY;
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -113,7 +113,7 @@ void Goomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (e->ny != 0)
 				{
 					vy = 0;
-					this->y = y0 + min_ty * dx + e->ny * 0.4f;
+					this->y = y0 + min_ty * dy + e->ny * 0.4f;
 				}
 
 			}
@@ -128,16 +128,18 @@ void Goomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void Goomba::Render()
 {
-	if (state != GOOMBA_STATE_INACTIVE)
+	if (isEnable == true)
 	{
-		int ani;
-		ani = GOOMBA_ANI_WALKING;
-		if (state == GOOMBA_STATE_DIE_NY) {
-			ani = GOOMBA_ANI_DIE;
+		if (state != GOOMBA_STATE_INACTIVE)
+		{
+			int ani;
+			ani = GOOMBA_ANI_WALKING;
+			if (state == GOOMBA_STATE_BEING_STROMPED) {
+				ani = GOOMBA_ANI_DIE;
+			}
+			animation_set->at(ani)->Render(nx, x, y);
 		}
-		animation_set->at(ani)->Render(nx, x, y);
 	}
-
 	//RenderBoundingBox();
 }
 
@@ -154,14 +156,13 @@ void Goomba::SetState(int state)
 		case GOOMBA_STATE_WALKING:
 			vx = nx * GOOMBA_WALKING_SPEED;
 			break;
-		case GOOMBA_STATE_DIE_NX:
+		case GOOMBA_STATE_BEING_SKILLED:
 			vy = -GOOMBA_DIE_DEFLECT_SPEED;
 			vx = 0;
 			isEnable = false;
 			break;
-		case GOOMBA_STATE_DIE_NY:
-			y += GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE + 3;
-			isEnable = false;
+		case GOOMBA_STATE_BEING_STROMPED:
+			y += GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE - 7;
 			vx = 0;
 			vy = 0;
 			break;
@@ -174,20 +175,27 @@ void Goomba::SetState(int state)
 
 bool Goomba::IsDead()
 {
-	if (this->state == GOOMBA_STATE_DIE_NY || this->state == GOOMBA_STATE_DIE_NX)
+	if (this->state == GOOMBA_STATE_BEING_STROMPED ||
+		this->state == GOOMBA_STATE_BEING_SKILLED ||
+		this->state == GOOMBA_STATE_INACTIVE)
 	{
 		return true;
 	}
 	return false;
 }
 
-void Goomba::SetDie(bool n)
+void Goomba::SetBeingStromped()
 {
-	if (n == true)
-	{
-		this->SetState(GOOMBA_STATE_DIE_NX);
-	}
-	else
-		this->SetState(GOOMBA_STATE_DIE_NY);
+	this->SetState(GOOMBA_STATE_BEING_STROMPED);
 	time_death = GetTickCount64();
+}
+void Goomba::SetBeingSkilled()
+{
+	this->SetState(GOOMBA_STATE_BEING_SKILLED);
+	time_death = GetTickCount64();
+}
+void Goomba::EnableAgain()
+{
+	Enemy::EnableAgain();
+	this->SetState(GOOMBA_STATE_WALKING);
 }

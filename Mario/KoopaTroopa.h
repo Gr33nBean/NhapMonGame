@@ -1,63 +1,37 @@
-#pragma once
+﻿#pragma once
 #include"GameObject.h"
 #include "Enemy.h"
 #include "Mario.h"
+#include "ThongSo.h"
 
-#define KOOPATROOPA_TYPE_RED	0
-#define KOOPATROOPA_TYPE_GREEN	1
-
-
-#define KOOPATROOPA_WALKING_SPEED 0.05f
-#define KOOPATROOPA_GRAVITY 0.002f
-#define KOOPATROOPA_BUMP_SPEED	0.3f
-#define KOOPATROOPA_DIE_DEFLECT_SPEED 0.5f
-
-#define KOOPATROOPA_BBOX_WIDTH 16
-#define KOOPATROOPA_BBOX_HEIGHT 26
-#define KOOPATROOPA_BBOX_HEIGHT_HIDING 16
-
-#define KOOPATROOPA_STATE_WALKING 100
-#define KOOPATROOPA_STATE_HIDING 200
-#define KOOPATROOPA_STATE_IS_PICKED_UP 300
-#define KOOPATROOPA_STATE_DIE_NX 400
-#define KOOPATROOPA_STATE_IS_BUMPED 500
-
-#define KOOPATROOPA_ANI_WALKING 0
-#define KOOPATROOPA_ANI_HIDING 1
-#define KOOPATROOPA_ANI_BUMPING 2
-#define KOOPATROOPA_ANI_DEATH	3
 class KoopaTroopa :public Enemy
 {
 	Mario* mario;
 	int type;
+	bool isBumped;
+	DWORD hidingTime = 0;
+	DWORD turnWalkingTime = 0;
+
+public:
+
+	//chuyển thành hàm
+	bool isPickedUp;
+
+
+	void IsKicked(int nx);
+	bool IsHiding();
+	virtual bool IsDead();
+	void PickUpBy(Mario* mario);
+
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom, bool isEnable);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
 
-	virtual int IsCollidable() { return 1; };
-	virtual int IsBlocking() { return 0; }
-public:
-	bool isPickedUp;
-	bool isBumped;
-	void PickUpBy(Mario* mario) {
-		isPickedUp = true;
-		this->mario = mario;
-		/*this->SetState (KOOPATROOPA_STATE_IS_PICKED_UP);*/
-	}
 
-	void IsKicked(int nx);
-
-	KoopaTroopa();
-	KoopaTroopa(int x, int y, int _type = 0) : Enemy(x, y)
-	{
-		isPickedUp = false;
-		isEnable = true;
-		isBumped = false;
-		type = _type;
-		this->SetState(KOOPATROOPA_STATE_WALKING);
-	}
 	virtual void SetState(int state);
-	virtual bool IsDead();
-	virtual void SetDie(bool n);
-	bool IsHiding();
+	//virtual void SetDie(bool n);
+	virtual void SetBeingStromped();
+	virtual void SetBeingSkilled();
+	virtual void EnableAgain();
+	KoopaTroopa(int x, int y, int _type = 0);
 };

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "AssetIDs.h"
+#include "ThongSo.h"
 
 #include "PlayScene.h"
 #include "Utils.h"
@@ -16,6 +16,7 @@
 
 using namespace std;
 
+
 PlayScene::PlayScene(int id, LPCWSTR filePath):
 	Scene(id, filePath)
 {
@@ -23,18 +24,6 @@ PlayScene::PlayScene(int id, LPCWSTR filePath):
 	key_handler = new PlaySceneKeyHandler(this);
 }
 
-
-#define SCENE_SECTION_UNKNOWN -1
-#define SCENE_SECTION_MAP	0
-#define SCENE_SECTION_ASSETS	1
-#define SCENE_SECTION_OBJECTS	2
-
-#define ASSETS_SECTION_UNKNOWN -1
-#define ASSETS_SECTION_SPRITES 1
-#define ASSETS_SECTION_ANIMATIONS 2
-#define ASSETS_SECTION_ANIMATION_SETS 3
-
-#define MAX_SCENE_LINE 1024
 
 void PlayScene::_ParseSection_SPRITES(string line)
 {
@@ -205,7 +194,7 @@ void PlayScene::LoadAssets(LPCWSTR assetFile)
 	ifstream f;
 	f.open(assetFile);
 
-	int section = ASSETS_SECTION_UNKNOWN;
+	int section = SCENE_SECTION_UNKNOWN;
 
 	char str[MAX_SCENE_LINE];
 	while (f.getline(str, MAX_SCENE_LINE))
@@ -214,9 +203,9 @@ void PlayScene::LoadAssets(LPCWSTR assetFile)
 
 		if (line[0] == '#') continue;	// skip comment lines	
 
-		if (line == "[SPRITES]") { section = ASSETS_SECTION_SPRITES; continue; };
-		if (line == "[ANIMATIONS]") { section = ASSETS_SECTION_ANIMATIONS; continue; };
-		if (line == "[ANIMATION_SETS]") { section = ASSETS_SECTION_ANIMATION_SETS; continue; };
+		if (line == "[SPRITES]") { section = SCENE_SECTION_SPRITES; continue; };
+		if (line == "[ANIMATIONS]") { section = SCENE_SECTION_ANIMATIONS; continue; };
+		if (line == "[ANIMATION_SETS]") { section = SCENE_SECTION_ANIMATION_SETS; continue; };
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }
 
 		//
@@ -224,9 +213,9 @@ void PlayScene::LoadAssets(LPCWSTR assetFile)
 		//
 		switch (section)
 		{
-		case ASSETS_SECTION_SPRITES: _ParseSection_SPRITES(line); break;
-		case ASSETS_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
-		case ASSETS_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
+		case SCENE_SECTION_SPRITES: _ParseSection_SPRITES(line); break;
+		case SCENE_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
+		case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 		}
 	}
 
@@ -251,7 +240,7 @@ void PlayScene::Load()
 		string line(str);
 
 		if (line[0] == '#') continue;	// skip comment lines	
-		if (line == "[MAP]") { section = SCENE_SECTION_MAP; continue; };
+		if (line == "[MAP]") { section = SCENE_SECTION_MAPS; continue; };
 		if (line == "[ASSETS]") { section = SCENE_SECTION_ASSETS; continue; };
 		if (line == "[OBJECTS]") { section = SCENE_SECTION_OBJECTS; continue; };
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
@@ -261,7 +250,7 @@ void PlayScene::Load()
 		//
 		switch (section)
 		{ 
-			case SCENE_SECTION_MAP: _ParseSection_MAPS(line); break;
+			case SCENE_SECTION_MAPS: _ParseSection_MAPS(line); break;
 			case SCENE_SECTION_ASSETS: _ParseSection_ASSETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
 		}
@@ -287,7 +276,15 @@ void PlayScene::Update(DWORD dt)
 
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		objects[i]->Update(dt, &coObjects);
+		if (dynamic_cast<Enemy*>(objects[i]))
+		{
+			if (dynamic_cast<Enemy*>(objects[i])->IsAbleToActive() == true)
+				objects[i]->Update(dt, &coObjects);
+			else
+				continue;
+		}
+		else
+			objects[i]->Update(dt, &coObjects);
 	}
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
@@ -306,7 +303,7 @@ void PlayScene::Update(DWORD dt)
 
 	/*cx -= game->GetScreenWidth() / 2;
 	cy -= game->GetScreenHeight() / 2;*/
-
+	TurnCamY(cy, player->IsFlying(), screenHeight, mapHeight);
 	if (cx - (screenWidth / 2) <= 16)
 	{
 		cx = 16;
@@ -319,27 +316,38 @@ void PlayScene::Update(DWORD dt)
 	{
 		cx -= (screenWidth / 2);
 	}
-
-	if (cy - (screenHeight / 2) < 16)
-		cy = 16;
-	else if (cy + (screenHeight / 2) >= 448)
-		cy = 448 - screenHeight;
+	if (_turnCamY == false)
+	{
+		if (cy + SCREEN_HEIGHT > 448)
+		{
+			cy = 448 - screenHeight;
+		}
+		else if (cy - screenHeight < 16)
+		{
+			cy = 16;
+		}
+	}
 	else
 	{
-		cy -= screenHeight / 2;
+		if (cy - (screenHeight / 2) < 16)
+			cy = 16;
+		else if (cy + (screenHeight / 2) >= 448)
+			cy = 448 - screenHeight;
+		else
+		{
+			cy -= screenHeight / 2;
+		}
 	}
 
 	Game::GetInstance()->SetCamPos(round(cx), round(cy));
-
-	//PurgeDeletedObjects();
 }
 
 void PlayScene::Render()
 {
-	map->Render();
-	for (int i = 0; i < objects.size(); i++)
+	this->map->Render();
+	for (int i = 1; i < objects.size(); i++)
 		objects[i]->Render();
-	//objects[0]->Render();
+	objects[0]->Render();
 }
 
 /*
@@ -398,4 +406,19 @@ void PlayScene::AddObject(GameObject* obj)
 {
 	this->objects.push_back(obj);
 	DebugOut(L"Size: %d", this->objects.size());
+}
+
+void PlayScene::TurnCamY(float _playerY, bool isFlying, int ScreenHeight, int MapHeight)
+{
+	if (_turnCamY == true && _playerY > 448 - ScreenHeight / 2
+		)
+	{
+		if (isFlying != true)
+			_turnCamY = false;
+		else
+			_turnCamY = true;
+	}
+
+	if (isFlying == true)
+		_turnCamY = true;
 }

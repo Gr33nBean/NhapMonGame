@@ -12,14 +12,23 @@ public:
 	virtual void SetState(int state);
 	virtual bool IsDead() = 0;
 
-	virtual	void SetDie(bool n) = 0; // nx == true; ny == false
-	virtual void SetEntryPosition(int x, int y);
-	virtual void SetReborn() {};
-	virtual void SetEnable(bool enable) {};
+	virtual void SetBeingStromped() = 0;
+	virtual void SetBeingSkilled() = 0;
+
+	virtual void SetEntryPosition(float x, float y);
+	void SetEnable() { this->isEnable = true; };
+
 	virtual bool IsEnable() { return this->isEnable; };
+	void EnableAgain();
 	bool IsAbleToActive();
 	Enemy();
-	Enemy(float x, float y);
+	Enemy(float x, float y) 
+	{ 
+		this->x = x; 
+		this->y = y; 
+		this->SetEntryPosition(x, y); 
+		isEnable = false; 
+	}
 	~Enemy();
 };
 

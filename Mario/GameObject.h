@@ -8,11 +8,9 @@
 #include "Animations.h"
 #include "Sprites.h"
 #include "Collision.h"
+#include "ThongSo.h"
 
 using namespace std;
-
-#define ID_TEX_BBOX -100		// special texture to draw object bounding box
-#define BBOX_ALPHA 0.25f		// Bounding box transparency
 
 class GameObject
 {
@@ -92,5 +90,5 @@ public:
 
 	~GameObject();
 
-	static bool IsDeleted(const LPGAMEOBJECT &o) { return o->isDeleted; }
+	//static bool IsDeleted(const LPGAMEOBJECT &o) { return o->isDeleted; }
 };

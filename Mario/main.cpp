@@ -36,17 +36,7 @@ HOW TO INSTALL Microsoft.DXSDK.D3DX
 #include "Map.h"
 #include "PlayScene.h"
 
-#include "AssetIDs.h"
-
-#define WINDOW_CLASS_NAME L"SuperMarioBros3"
-#define MAIN_WINDOW_TITLE L"Super Mario Bros 3"
-#define WINDOW_ICON_PATH L"mario.ico"
-
-#define BACKGROUND_COLOR D3DXCOLOR(181.0f/255, 236.0f/255, 243.0f/255, 0.0f)
-
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
-
+#include "ThongSo.h"
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {

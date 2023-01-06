@@ -15,10 +15,34 @@ void PlaySceneKeyHandler::OnKeyDown(int KeyCode)
 	{
 	case DIK_K:
 		mario->StartJumping();
+		mario->Float();
+		mario->Fly();
 		break;
 	case DIK_U:
 		mario->UpForm();
 		break;
+	case DIK_R:
+		mario->Reset();
+	case DIK_C:
+	{
+		KoopaTroopa* koopa = new KoopaTroopa(960, 383, 1);
+		koopa->SetEnable();
+		AnimationSets* animation_sets = AnimationSets::GetInstance();
+		LPANIMATION_SET ani_set = animation_sets->Get(4);
+		koopa->SetAnimationSet(ani_set);
+		((PlayScene*)scence)->AddObject((KoopaTroopa*)koopa);
+		break;
+	}
+	case DIK_G:
+	{
+		Goomba* goopa = new Goomba(960, 383);
+		goopa->SetEnable();
+		AnimationSets* animation_sets = AnimationSets::GetInstance();
+		LPANIMATION_SET ani_set = animation_sets->Get(3);
+		goopa->SetAnimationSet(ani_set);
+		((PlayScene*)scence)->AddObject((Goomba*)goopa);
+		break;
+	}
 	case DIK_I:
 		mario->Information();
 		break;
@@ -51,9 +75,9 @@ void PlaySceneKeyHandler::OnKeyUp(int KeyCode)
 	switch (KeyCode)
 	{
 	case DIK_J:
-		mario->isPickingUp = false;
-		mario->isPressedJ = false;
-		mario->SetState(MARIO_STATE_IDLE);
+		mario->LosePowerMelter();
+		mario->ReleaseJ();
+		//mario->SetState(MARIO_STATE_IDLE);
 		break;
 	case DIK_A:
 		mario->turnFriction = true;
@@ -62,6 +86,7 @@ void PlaySceneKeyHandler::OnKeyUp(int KeyCode)
 		mario->turnFriction = true;
 		break;
 	case DIK_K:
+		/* mario->Float();*/
 		mario->Jump();
 		break;
 	case DIK_S:
@@ -79,40 +104,46 @@ void PlaySceneKeyHandler::KeyState(BYTE *states)
 	if (game->IsKeyDown(DIK_D))
 	{
 		mario->SetDirect(true);
-		if (game->IsKeyDown(DIK_J))
+		if (!mario->IsFlying() && !mario->IsFloating())
 		{
-			mario->FillUpPowerMelter();
-			mario->PickUp();
-		}
+			if (game->IsKeyDown(DIK_J))
+			{
+				mario->FillUpPowerMelter();
+				mario->PickUp();
+			}
 
-		mario->SetState(MARIO_STATE_WALKING);
-		if (game->IsKeyDown(DIK_A))
-		{
-			mario->SetDirect(false);
-			mario->SetState(MARIO_STATE_BRAKING);
-		}
-		if (game->IsKeyDown(DIK_K))
-		{
-			mario->SuperJump();
+			mario->SetState(MARIO_STATE_WALKING);
+			if (game->IsKeyDown(DIK_A))
+			{
+				mario->SetDirect(false);
+				mario->SetState(MARIO_STATE_BRAKING);
+			}
+			if (game->IsKeyDown(DIK_K))
+			{
+				mario->SuperJump();
+			}
 		}
 	}
 	else if (game->IsKeyDown(DIK_A))
 	{
 		mario->SetDirect(false);
-		if (game->IsKeyDown(DIK_J))
+		if (!mario->IsFlying() && !mario->IsFloating())
 		{
-			mario->FillUpPowerMelter();
-			mario->PickUp();
-		}
-		mario->SetState(MARIO_STATE_WALKING);
-		if (game->IsKeyDown(DIK_D))
-		{
-			mario->SetDirect(true);
-			mario->SetState(MARIO_STATE_BRAKING);
-		}
-		if (game->IsKeyDown(DIK_K))
-		{
-			mario->SuperJump();
+			if (game->IsKeyDown(DIK_J))
+			{
+				mario->FillUpPowerMelter();
+				mario->PickUp();
+			}
+			mario->SetState(MARIO_STATE_WALKING);
+			if (game->IsKeyDown(DIK_D))
+			{
+				mario->SetDirect(true);
+				mario->SetState(MARIO_STATE_BRAKING);
+			}
+			if (game->IsKeyDown(DIK_K))
+			{
+				mario->SuperJump();
+			}
 		}
 	}
 	//else if (game->IsKeyDown(DIK_K))
@@ -126,10 +157,12 @@ void PlaySceneKeyHandler::KeyState(BYTE *states)
 	else if (game->IsKeyDown(DIK_K))
 	{
 		mario->SuperJump();
+		/*	mario->Float();
+	mario->Fly();*/
 	}
 	else
 	{
-		mario->LosePowerMelter();
+		//mario->LosePowerMelter();
 		/*	mario->SetState(MARIO_STATE_IDLE);*/
 		/*	mario->turnFriction = true;*/
 		if (game->IsKeyDown(DIK_J))

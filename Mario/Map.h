@@ -3,9 +3,8 @@
 #include <d3dx10.h>
 #include "Sprites.h"
 #include "Textures.h"
+#include "ThongSo.h"
 
-#define TILE_WIDTH 16
-#define TILE_HEIGHT 16
 class Map
 {
 	int** Matrix;

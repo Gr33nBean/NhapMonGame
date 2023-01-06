@@ -1,7 +1,7 @@
 #pragma once
 #include "GameObject.h"
-#define BLOCK_BBOX_WIDTH  32
-#define BLOCK_BBOX_HEIGHT 16
+#include "ThongSo.h"
+
 class Pipe :public GameObject
 {
 public:

@@ -1,0 +1,24 @@
+# id	left	top	right	bottom	texture_id
+[SPRITES]
+#GREEN
+#biting
+30040	0	144	16	176	70
+#darting
+30041	17	144	33	176	70
+#RED
+#biting
+30042	96	144	112	176	70
+#darting
+30043	113	144	128	176	70
+#die
+30044	192	0	208	16	70
+30045	209	0	215	16	70
+30046	216	0	232	16	70
+30047	233	0	249	16	70
+
+# ani_id	sprite1_id	time1	sprite2_id	time2	...
+[ANIMATIONS]
+
+
+# id	ani1	ani2	ani3
+[ANIMATION_SETS]
